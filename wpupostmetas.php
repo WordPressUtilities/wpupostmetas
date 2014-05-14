@@ -1,9 +1,10 @@
 <?php
+
 /*
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.8
+Version: 0.9
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -58,6 +59,7 @@ class WPUPostMetas
             $boxfields = $this->fields_from_box($id, $this->fields);
             if (!empty($boxfields)) {
                 foreach ($box['post_type'] as $type) {
+
                     // Capability refused
                     if (!current_user_can($box['capability'])) {
                         continue;
@@ -87,6 +89,7 @@ class WPUPostMetas
      */
     function save_postdata($post_id) {
         $this->load_fields();
+        $languages = $this->get_languages();
 
         $boxes = $this->boxes;
         $fields = $this->fields;
@@ -113,9 +116,21 @@ class WPUPostMetas
             if (in_array($post_type, $box['post_type']) && current_user_can($box['capability'])) {
                 $boxfields = $this->fields_from_box($id, $fields);
                 foreach ($boxfields as $field_id => $field) {
-                    $field_value = $this->check_field_value($field_id, $field);
-                    if ($field_value !== false) {
-                        update_post_meta($post_ID, $field_id, $field_value);
+
+                    // Multilingual field
+                    if (isset($field['lang']) && $field['lang'] && !empty($languages)) {
+                        foreach ($languages as $idlang => $lang) {
+                            $tmp_field_id = $idlang . '___' . $field_id;
+                            $field_value = $this->check_field_value($tmp_field_id, $field);
+                            if ($field_value !== false) {
+                                update_post_meta($post_ID, $tmp_field_id, $field_value);
+                            }
+                        }
+                    } else {
+                        $field_value = $this->check_field_value($field_id, $field);
+                        if ($field_value !== false) {
+                            update_post_meta($post_ID, $field_id, $field_value);
+                        }
                     }
                 }
             }
@@ -129,7 +144,7 @@ class WPUPostMetas
      * @param unknown $details
      */
     function box_content($post, $details) {
-
+        $languages = $this->get_languages();
         $fields = $this->fields;
         $fields = $this->control_fields_datas($fields);
         wp_nonce_field(plugin_basename(__FILE__) , 'wputh_post_metas_noncename');
@@ -137,79 +152,99 @@ class WPUPostMetas
         foreach ($fields as $id => $field) {
             if ('wputh_box_' . $field['box'] == $details['id']) {
 
-                $value = trim(get_post_meta($post->ID, $id, true));
-
-                // If new post, try to load a default value
-                if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
-                    $value = $field['default'];
+                // Multilingual field
+                if (isset($field['lang']) && $field['lang'] && !empty($languages)) {
+                    foreach ($languages as $idlang => $lang) {
+                        $new_field = $field;
+                        $new_field['name'] = '[' . $idlang . '] ' . $new_field['name'];
+                        $this->field_content($post, $idlang . '___' . $id, $new_field);
+                    }
+                } else {
+                    $this->field_content($post, $id, $field);
                 }
-
-                $idname = 'id="el_id_' . $id . '" name="' . $id . '"';
-                echo '<tr>';
-                echo '<td valign="top" style="width: 150px;"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></td>';
-                echo '<td valign="top" style="width: 450px;">';
-                switch ($field['type']) {
-                    case 'attachment':
-                        $args = array(
-                            'post_type' => 'attachment',
-                            'posts_per_page' => - 1,
-                            'post_status' => 'any',
-                            'post_parent' => $post->ID
-                        );
-                        $attachments = get_posts($args);
-                        if ($attachments) {
-                            echo '<div class="wpupostmetas-attachments__container"><span class="before"></span>';
-                            echo '<div class="preview-img" id="preview-' . $id . '"></div>';
-                            echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $post->ID . '" data-postvalue="' . $value . '">';
-                            echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
-                            foreach ($attachments as $attachment) {
-                                $data_guid = '';
-                                if (strpos($attachment->post_mime_type, 'image/') !== false) {
-                                    $data_guid = 'data-guid="' . $attachment->guid . '"';
-                                }
-                                echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
-                            }
-                            echo '</select>';
-                            echo '</div>';
-                        } else {
-                            echo '<span>' . __('No attachments', 'wpupostmetas') . '</span>';
-                        }
-                        break;
-
-                    case 'email':
-                        echo '<input type="email" ' . $idname . ' value="' . esc_attr($value) . '" />';
-                        break;
-
-                    case 'select':
-                        echo '<select ' . $idname . '>';
-                        echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
-                        foreach ($field['datas'] as $key => $var) {
-                            echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
-                        }
-                        echo '</select>';
-                        break;
-
-                    case 'textarea':
-                    case 'htmlcontent':
-                        echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
-                        break;
-
-                    case 'editor':
-                        wp_editor($value, $id);
-                        break;
-
-                    case 'url':
-                        echo '<input type="url" ' . $idname . ' value="' . esc_attr($value) . '" />';
-                        break;
-
-                    default:
-                        echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
-                }
-                echo '</td>';
-                echo '</tr>';
             }
         }
         echo '</table>';
+    }
+
+    /**
+     * Shows meta box field
+     *
+     * @param unknown $post
+     * @param unknown $id
+     * @param unknown $field
+     */
+    function field_content($post, $id, $field) {
+        $value = trim(get_post_meta($post->ID, $id, true));
+
+        // If new post, try to load a default value
+        if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
+            $value = $field['default'];
+        }
+
+        $idname = 'id="el_id_' . $id . '" name="' . $id . '"';
+        echo '<tr>';
+        echo '<td valign="top" style="width: 150px;"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></td>';
+        echo '<td valign="top" style="width: 450px;">';
+        switch ($field['type']) {
+            case 'attachment':
+                $args = array(
+                    'post_type' => 'attachment',
+                    'posts_per_page' => - 1,
+                    'post_status' => 'any',
+                    'post_parent' => $post->ID
+                );
+                $attachments = get_posts($args);
+                if ($attachments) {
+                    echo '<div class="wpupostmetas-attachments__container"><span class="before"></span>';
+                    echo '<div class="preview-img" id="preview-' . $id . '"></div>';
+                    echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $post->ID . '" data-postvalue="' . $value . '">';
+                    echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
+                    foreach ($attachments as $attachment) {
+                        $data_guid = '';
+                        if (strpos($attachment->post_mime_type, 'image/') !== false) {
+                            $data_guid = 'data-guid="' . $attachment->guid . '"';
+                        }
+                        echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
+                    }
+                    echo '</select>';
+                    echo '</div>';
+                } else {
+                    echo '<span>' . __('No attachments', 'wpupostmetas') . '</span>';
+                }
+                break;
+
+            case 'email':
+                echo '<input type="email" ' . $idname . ' value="' . esc_attr($value) . '" />';
+                break;
+
+            case 'select':
+                echo '<select ' . $idname . '>';
+                echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
+                foreach ($field['datas'] as $key => $var) {
+                    echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
+                }
+                echo '</select>';
+                break;
+
+            case 'textarea':
+            case 'htmlcontent':
+                echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
+                break;
+
+            case 'editor':
+                wp_editor($value, $id);
+                break;
+
+            case 'url':
+                echo '<input type="url" ' . $idname . ' value="' . esc_attr($value) . '" />';
+                break;
+
+            default:
+                echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
+        }
+        echo '</td>';
+        echo '</tr>';
     }
 
     function list_attachments_options() {
@@ -376,6 +411,54 @@ class WPUPostMetas
             $this->fields = apply_filters('wputh_post_metas_fields', array());
         }
     }
+
+    /**
+     * Obtain a list of languages
+     *
+     * @return array
+     */
+    private function get_languages() {
+        global $q_config;
+        $languages = array();
+
+        // Obtaining from Qtranslate
+        if (isset($q_config['enabled_languages'])) {
+            foreach ($q_config['enabled_languages'] as $lang) {
+                if (!in_array($lang, $languages) && isset($q_config['language_name'][$lang])) {
+                    $languages[$lang] = $q_config['language_name'][$lang];
+                }
+            }
+        }
+        return $languages;
+    }
 }
 
 $WPUPostMetas = new WPUPostMetas();
+
+/* ----------------------------------------------------------
+  Utilities
+---------------------------------------------------------- */
+
+/**
+ * Get an option value with l18n
+ *
+ * @param integer  $post_id
+ * @param string  $name
+ * @param bool  $single
+ *
+ * @return mixed
+ */
+function wputh_l18n_get_post_meta($id, $name, $single) {
+    global $q_config;
+
+    $meta = get_post_meta($id, $name, $single);
+
+    if (isset($q_config['language'])) {
+        $meta_l18n = get_post_meta($id, $q_config['language'] . '___' . $name, $single);
+        if (!empty($meta_l18n)) {
+            $meta = $meta_l18n;
+        }
+    }
+
+    return $meta;
+}
