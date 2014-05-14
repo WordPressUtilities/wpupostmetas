@@ -1,5 +1,4 @@
 <?php
-
 /*
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
