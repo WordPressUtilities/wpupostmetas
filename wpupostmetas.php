@@ -3,7 +3,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.9
+Version: 0.9.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -213,10 +213,6 @@ class WPUPostMetas
                 }
                 break;
 
-            case 'email':
-                echo '<input type="email" ' . $idname . ' value="' . esc_attr($value) . '" />';
-                break;
-
             case 'select':
                 echo '<select ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
@@ -235,8 +231,10 @@ class WPUPostMetas
                 wp_editor($value, $id);
                 break;
 
+            case 'date':
+            case 'email':
             case 'url':
-                echo '<input type="url" ' . $idname . ' value="' . esc_attr($value) . '" />';
+                echo '<input type="'.$field['type'].'" ' . $idname . ' value="' . esc_attr($value) . '" />';
                 break;
 
             default:
