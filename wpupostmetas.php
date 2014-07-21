@@ -3,7 +3,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.9.1
+Version: 0.9.2
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -233,6 +233,7 @@ class WPUPostMetas
 
             case 'date':
             case 'email':
+            case 'number':
             case 'url':
                 echo '<input type="'.$field['type'].'" ' . $idname . ' value="' . esc_attr($value) . '" />';
                 break;
