@@ -3,7 +3,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.9.2
+Version: 0.9.3
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -372,9 +372,12 @@ class WPUPostMetas
         foreach ($fields as $id => $field) {
             $new_fields[$id] = array_merge($default_field, $field);
 
-            // if incomplete "select" : defaults to txt
+            // if incomplete "select" : defaults to 0/1
             if ($new_fields[$id]['type'] == 'select' && empty($new_fields[$id]['datas'])) {
-                $new_fields[$id]['type'] = 'text';
+                $new_fields[$id]['datas'] = array(
+                    0 => __('No', 'wpupostmetas'),
+                    1 => __('Yes', 'wpupostmetas')
+                );
             }
         }
 
