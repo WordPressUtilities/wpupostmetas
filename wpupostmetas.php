@@ -1,9 +1,10 @@
 <?php
+
 /*
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.9.3
+Version: 0.9.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -146,10 +147,12 @@ class WPUPostMetas
         $languages = $this->get_languages();
         $fields = $this->fields;
         $fields = $this->control_fields_datas($fields);
+        $boxid = str_replace('wputh_box_', '', $details['id']);
+        $boxfields = $this->fields_from_box($boxid, $this->fields);
         wp_nonce_field(plugin_basename(__FILE__) , 'wputh_post_metas_noncename');
         echo '<table class="wpupostmetas-table">';
         foreach ($fields as $id => $field) {
-            if ('wputh_box_' . $field['box'] == $details['id']) {
+            if (array_key_exists($id, $boxfields)) {
 
                 // Multilingual field
                 if (isset($field['lang']) && $field['lang'] && !empty($languages)) {
@@ -235,7 +238,7 @@ class WPUPostMetas
             case 'email':
             case 'number':
             case 'url':
-                echo '<input type="'.$field['type'].'" ' . $idname . ' value="' . esc_attr($value) . '" />';
+                echo '<input type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
                 break;
 
             default:
@@ -375,7 +378,7 @@ class WPUPostMetas
             // if incomplete "select" : defaults to 0/1
             if ($new_fields[$id]['type'] == 'select' && empty($new_fields[$id]['datas'])) {
                 $new_fields[$id]['datas'] = array(
-                    0 => __('No', 'wpupostmetas'),
+                    0 => __('No', 'wpupostmetas') ,
                     1 => __('Yes', 'wpupostmetas')
                 );
             }
@@ -394,7 +397,15 @@ class WPUPostMetas
     function fields_from_box($box_id, $fields) {
         $boxfields = array();
         foreach ($fields as $id => $field) {
-            if (isset($field['box']) && $field['box'] == $box_id) {
+            if (!isset($field['box'])) {
+                continue;
+            }
+            if (!is_array($field['box'])) {
+                $field['box'] = array(
+                    $field['box']
+                );
+            }
+            if (in_array($box_id, $field['box'])) {
                 $boxfields[$id] = $field;
             }
         }
