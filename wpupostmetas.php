@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.9.4
+Version: 0.10
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -94,7 +94,7 @@ class WPUPostMetas
         $boxes = $this->boxes;
         $fields = $this->fields;
 
-        $fields = $this->control_fields_datas($fields);
+        $fields = $this->control_fields_settings($fields);
         $post_type = isset($_POST['post_type']) ? $_POST['post_type'] : 'post';
 
         // First we need to check if the current user is authorised to do this action.
@@ -146,7 +146,7 @@ class WPUPostMetas
     function box_content($post, $details) {
         $languages = $this->get_languages();
         $fields = $this->fields;
-        $fields = $this->control_fields_datas($fields);
+        $fields = $this->control_fields_settings($fields);
         $boxid = str_replace('wputh_box_', '', $details['id']);
         $boxfields = $this->fields_from_box($boxid, $this->fields);
         wp_nonce_field(plugin_basename(__FILE__) , 'wputh_post_metas_noncename');
@@ -183,11 +183,11 @@ class WPUPostMetas
         if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
             $value = $field['default'];
         }
-
-        $idname = 'id="el_id_' . $id . '" name="' . $id . '"';
+        $el_id = 'el_id_' . $id;
+        $idname = 'id="' . $el_id . '" name="' . $id . '"';
         echo '<tr>';
-        echo '<td valign="top" style="width: 150px;"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></td>';
-        echo '<td valign="top" style="width: 450px;">';
+        echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></th>';
+        echo '<td valign="top">';
         switch ($field['type']) {
             case 'attachment':
                 $args = array(
@@ -223,6 +223,36 @@ class WPUPostMetas
                     echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
                 }
                 echo '</select>';
+                break;
+
+            case 'radio':
+                foreach ($field['datas'] as $key => $var) {
+                    $item_id = 'radio_' . $id . '_' . $key;
+                    echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string)$key === (string)$value ? 'checked="checked"' : '') . ' />';
+                    echo '<label for="' . $item_id . '">' . $var . '</label>';
+                }
+                break;
+
+            case 'post':
+                $wpq_post_type_field = new WP_Query( array(
+                    'posts_per_page' => -1,
+                    'post_type' => $field['post_type']
+                ) );
+                if ( $wpq_post_type_field->have_posts() ) {
+                    echo '<select ' . $idname . '>';
+                    echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
+                    while ( $wpq_post_type_field->have_posts() ) {
+                        $wpq_post_type_field->the_post();
+                        $post_id = get_the_ID();
+                        echo '<option value="' . $post_id . '" ' . ((string)$post_id === (string)$value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
+                    }
+                    echo '</select>';
+                }
+                else {
+
+                }
+                wp_reset_postdata();
+
                 break;
 
             case 'textarea':
@@ -301,6 +331,7 @@ class WPUPostMetas
                 $return = (filter_var($value, FILTER_VALIDATE_EMAIL) !== false || empty($value)) ? $value : false;
                 break;
 
+            case 'radio':
             case 'select':
                 $return = array_key_exists($value, $field['datas']) ? $value : false;
                 break;
@@ -362,7 +393,7 @@ class WPUPostMetas
      * @param unknown $fields
      * @return unknown
      */
-    function control_fields_datas($fields) {
+    function control_fields_settings($fields) {
         $default_field = array(
             'box' => '',
             'name' => 'Field Name',
@@ -375,12 +406,17 @@ class WPUPostMetas
         foreach ($fields as $id => $field) {
             $new_fields[$id] = array_merge($default_field, $field);
 
-            // if incomplete "select" : defaults to 0/1
-            if ($new_fields[$id]['type'] == 'select' && empty($new_fields[$id]['datas'])) {
+            // Default datas to 0/1
+            if (empty($new_fields[$id]['datas'])) {
                 $new_fields[$id]['datas'] = array(
                     0 => __('No', 'wpupostmetas') ,
                     1 => __('Yes', 'wpupostmetas')
                 );
+            }
+
+            // Default post type to post
+            if (empty($new_fields[$id]['post_type'])) {
+                $new_fields[$id]['datas'] = 'post';
             }
         }
 

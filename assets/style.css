@@ -4,6 +4,36 @@
   Box style
 ---------------------------------------------------------- */
 
+.wpupostmetas-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.wpupostmetas-table th,
+.wpupostmetas-table td {
+    vertical-align: top;
+}
+
+.wpupostmetas-table th {
+    width: 150px;
+    text-align: left;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+/* Fields
+-------------------------- */
+
+.wpupostmetas-table input[type=radio] {
+    margin-right: 5px;
+    vertical-align: -5px;
+}
+
+.wpupostmetas-table label + input[type=radio] {
+    margin-left: 20px;
+}
+
 /* Attachment
 -------------------------- */
 
