@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.10
+Version: 0.11
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -37,14 +37,94 @@ class WPUPostMetas
             add_action('wp_ajax_wpupostmetas_attachments', array(&$this,
                 'list_attachments_options'
             ));
+            add_action('init', array(&$this,
+                'init'
+            ));
         }
+    }
+
+    function init() {
+        $this->load_fields();
+        $this->set_admin_columns();
     }
 
     function load_assets() {
         $screen = get_current_screen();
         if ($screen->base == 'post') {
             wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__));
-            wp_enqueue_script('wpupostmetas_scripts', plugins_url('/assets/global.js', __FILE__));
+            wp_enqueue_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__));
+        }
+    }
+
+    /*
+     * Admin list columns
+    */
+
+    function set_admin_columns() {
+
+        $this->admin_columns = array();
+        foreach ($this->boxes as $box) {
+            if (isset($box['post_type']) && is_array($box['post_type'])) {
+                foreach ($box['post_type'] as $post_type) {
+                    $this->admin_columns[$post_type] = array();
+                }
+            }
+        }
+        foreach ($this->fields as $field_id => $field) {
+            if (!isset($field['admin_column']) || $field['admin_column'] !== true) {
+                continue;
+            }
+            $this->admin_columns[$post_type][$field_id] = $field;
+        }
+
+        foreach ($this->admin_columns as $post_type => $values) {
+            add_filter('manage_edit-' . $post_type . '_columns', array(&$this,
+                'set_columns_head'
+            ));
+            add_action('manage_' . $post_type . '_posts_custom_column', array(&$this,
+                'set_columns_content'
+            ) , 10, 2);
+        }
+    }
+
+    // Display columns header
+    function set_columns_head($defaults) {
+        global $post;
+        foreach ($this->admin_columns as $post_type => $values) {
+            if ($post_type == $post->post_type) {
+                foreach ($values as $field_id => $field) {
+                    $defaults['wpupostmetas_' . $field_id] = $field['name'];
+                }
+            }
+        }
+        return $defaults;
+    }
+
+    // Display column content
+    function set_columns_content($column_name, $post_ID) {
+
+        // Each post type
+        foreach ($this->admin_columns as $post_type => $values) {
+            foreach ($values as $field_id => $field) {
+
+                // Display column value
+                if ($column_name == 'wpupostmetas_' . $field_id) {
+                    $value = get_post_meta($post_ID, $field_id, 1);
+                    switch ($field['type']) {
+                        case 'select':
+
+                            // If valid select, display data label
+                            if (isset($field['datas']) && array_key_exists($value, $field['datas'])) {
+                                echo $field['datas'][$value];
+                                break;
+                            }
+                        default:
+
+                            // Display raw value
+                            echo $value;
+                    }
+                }
+            }
         }
     }
 
@@ -234,22 +314,20 @@ class WPUPostMetas
                 break;
 
             case 'post':
-                $wpq_post_type_field = new WP_Query( array(
-                    'posts_per_page' => -1,
+                $wpq_post_type_field = new WP_Query(array(
+                    'posts_per_page' => - 1,
                     'post_type' => $field['post_type']
-                ) );
-                if ( $wpq_post_type_field->have_posts() ) {
+                ));
+                if ($wpq_post_type_field->have_posts()) {
                     echo '<select ' . $idname . '>';
                     echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
-                    while ( $wpq_post_type_field->have_posts() ) {
+                    while ($wpq_post_type_field->have_posts()) {
                         $wpq_post_type_field->the_post();
                         $post_id = get_the_ID();
                         echo '<option value="' . $post_id . '" ' . ((string)$post_id === (string)$value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
                     }
                     echo '</select>';
-                }
-                else {
-
+                } else {
                 }
                 wp_reset_postdata();
 
@@ -416,7 +494,7 @@ class WPUPostMetas
 
             // Default post type to post
             if (empty($new_fields[$id]['post_type'])) {
-                $new_fields[$id]['datas'] = 'post';
+                $new_fields[$id]['post_type'] = 'post';
             }
         }
 
