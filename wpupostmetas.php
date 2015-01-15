@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.11
+Version: 0.12
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -71,7 +71,7 @@ class WPUPostMetas
             }
         }
         foreach ($this->fields as $field_id => $field) {
-            if (!isset($field['admin_column']) || $field['admin_column'] !== true) {
+            if ($field['admin_column'] !== true) {
                 continue;
             }
             $this->admin_columns[$post_type][$field_id] = $field;
@@ -132,7 +132,6 @@ class WPUPostMetas
      * Adds meta boxes
      */
     function add_custom_box() {
-        $this->load_fields();
         global $post;
         foreach ($this->boxes as $id => $box) {
             $box = $this->control_box_datas($box);
@@ -144,6 +143,9 @@ class WPUPostMetas
                     if (!current_user_can($box['capability'])) {
                         continue;
                     }
+                    if (!isset($box['context'])) {
+                        $box['context'] = 'normal';
+                    }
                     if (isset($box['page_template'])) {
                         if (!isset($post->ID)) {
                             continue;
@@ -153,10 +155,10 @@ class WPUPostMetas
                             continue;
                         }
                     }
-                    add_meta_box('wputh_box_' . $id, $box['name'], array(
+                    add_meta_box('wputh_box_' . $id, $type . $box['name'], array(
                         $this,
                         'box_content'
-                    ) , $type);
+                    ) , $type, $box['context']);
                 }
             }
         }
@@ -168,13 +170,11 @@ class WPUPostMetas
      * @param unknown $post_id
      */
     function save_postdata($post_id) {
-        $this->load_fields();
         $languages = $this->get_languages();
 
         $boxes = $this->boxes;
         $fields = $this->fields;
 
-        $fields = $this->control_fields_settings($fields);
         $post_type = isset($_POST['post_type']) ? $_POST['post_type'] : 'post';
 
         // First we need to check if the current user is authorised to do this action.
@@ -226,7 +226,6 @@ class WPUPostMetas
     function box_content($post, $details) {
         $languages = $this->get_languages();
         $fields = $this->fields;
-        $fields = $this->control_fields_settings($fields);
         $boxid = str_replace('wputh_box_', '', $details['id']);
         $boxfields = $this->fields_from_box($boxid, $this->fields);
         wp_nonce_field(plugin_basename(__FILE__) , 'wputh_post_metas_noncename');
@@ -327,7 +326,6 @@ class WPUPostMetas
                         echo '<option value="' . $post_id . '" ' . ((string)$post_id === (string)$value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
                     }
                     echo '</select>';
-                } else {
                 }
                 wp_reset_postdata();
 
@@ -342,6 +340,7 @@ class WPUPostMetas
                 wp_editor($value, $id);
                 break;
 
+            case 'color':
             case 'date':
             case 'email':
             case 'number':
@@ -476,6 +475,7 @@ class WPUPostMetas
             'box' => '',
             'name' => 'Field Name',
             'type' => 'text',
+            'admin_column' => false,
             'datas' => array()
         );
 
@@ -530,12 +530,17 @@ class WPUPostMetas
      * Load fields values
      */
     function load_fields() {
+
+        // Load items
         if (empty($this->boxes)) {
             $this->boxes = apply_filters('wputh_post_metas_boxes', array());
         }
         if (empty($this->fields)) {
             $this->fields = apply_filters('wputh_post_metas_fields', array());
         }
+
+        // Check content
+        $this->fields = $this->control_fields_settings($this->fields);
     }
 
     /**

@@ -22,6 +22,29 @@
     user-select: none;
 }
 
+/* Side
+-------------------------- */
+
+#side-sortables .wpupostmetas-table tbody,
+#side-sortables .wpupostmetas-table thead,
+#side-sortables .wpupostmetas-table tr,
+#side-sortables .wpupostmetas-table td,
+#side-sortables .wpupostmetas-table {
+    display: block;
+}
+
+#side-sortables .wpupostmetas-table th {
+    width: 100%;
+}
+
+#side-sortables .wpupostmetas-table td {
+    padding-top: 5px;
+}
+
+#side-sortables .wpupostmetas-table tr + tr th {
+    padding-top: 15px;
+}
+
 /* Fields
 -------------------------- */
 
