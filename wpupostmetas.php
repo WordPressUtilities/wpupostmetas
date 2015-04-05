@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.12.1
+Version: 0.12.2
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -314,7 +314,10 @@ class WPUPostMetas
 
             case 'post':
                 $wpq_post_type_field = new WP_Query(array(
-                    'posts_per_page' => - 1,
+                    'posts_per_page' => -1,
+                    'no_found_rows' => true,
+                    'update_post_term_cache' => false,
+                    'update_post_meta_cache' => false,
                     'post_type' => $field['post_type']
                 ));
                 if ($wpq_post_type_field->have_posts()) {
