@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.12.2
+Version: 0.13
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -340,9 +340,57 @@ class WPUPostMetas
                 break;
 
             case 'editor':
-                wp_editor($value, $id);
+                wp_editor($value, $id, array(
+                    'textarea_rows' => 3
+                ));
                 break;
+            case 'table':
 
+                $table_columns = $field['columns'];
+                $table_width = count($table_columns);
+                $values = json_decode($value);
+                $table_basename = $id . '__';
+
+                echo '<div class="wpupostmetas-table-post-wrap">';
+                echo '<table data-table-basename="' . $table_basename . '" class="wpupostmetas-table-post">';
+                echo '<thead><tr>';
+                foreach ($table_columns as $col) {
+                    echo '<th>' . $col['name'] . '</th>';
+                }
+                echo '</tr></thead>';
+                echo '<tbody>';
+
+                if (is_array($values)) {
+                    foreach ($values as $col) {
+                        echo '<tr>';
+                        foreach ($col as $col_id => $col_value) {
+                            echo '<td><input name="' . $table_basename . $col_id . '" type="text" value="' . esc_attr($col_value) . '" /></td>';
+                        }
+                        echo '</tr>';
+                    }
+                }
+                else {
+                    echo '<tr>';
+                    foreach ($table_columns as $col_id => $col_value) {
+                        echo '<td><input name="' . $table_basename . $col_id . '" type="text" value="" /></td>';
+                    }
+                    echo '</tr>';
+                }
+
+                echo '</tbody>';
+                echo '</table>';
+                echo '<button type="button" class="plus">+</button>';
+                echo '<input type="hidden" ' . $idname . ' value="" />';
+                echo '<textarea class="template">';
+                echo htmlentities('<tr>');
+                foreach ($table_columns as $col_id => $col_value) {
+                    echo htmlentities('<td><input name="' . $table_basename . $col_id . '" type="text" value="" /></td>');
+                }
+                echo htmlentities('</tr>');
+
+                echo '</textarea>';
+                echo '</div>';
+            break;
             case 'color':
             case 'date':
             case 'email':
@@ -428,6 +476,9 @@ class WPUPostMetas
                 $return = $value;
                 break;
 
+            case 'table':
+                $return = $value;
+            break;
             case 'url':
                 $return = (filter_var($value, FILTER_VALIDATE_URL) !== false || empty($value)) ? $value : false;
                 break;

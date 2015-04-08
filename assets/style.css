@@ -109,3 +109,20 @@
     max-width: 50px;
     vertical-align: middle;
 }
+
+/* Table
+-------------------------- */
+
+.wpupostmetas-table-post-wrap {
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    background-color: #f0f0f0;
+}
+
+.wpupostmetas-table-post-wrap .template {
+    visibility: hidden;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
