@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.14.1
+Version: 0.14.2
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -323,6 +323,7 @@ class WPUPostMetas {
                 if ($wpq_post_type_field->have_posts()) {
                     echo '<select ' . $idname . '>';
                     echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
+                    echo '<option value="">' . __('None', 'wpupostmetas') . '</option>';
                     while ($wpq_post_type_field->have_posts()) {
                         $wpq_post_type_field->the_post();
                         $post_id = get_the_ID();
