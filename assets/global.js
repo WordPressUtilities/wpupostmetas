@@ -53,13 +53,35 @@ var wpupostmetas_settables = function() {
             input = tableParent.find('input[type=hidden]');
 
         wpupostmetas_settable(table, input);
+        // Save values in field
+        table.on('change keydown keyup', 'input', function() {
+            wpupostmetas_settable(table, input);
+        });
+        // Add a new line
         tableParent.on('click', '.plus', function(e) {
             e.preventDefault();
             table.append(jQuery(tpl.val()));
         });
-        table.on('change keydown keyup', 'input', function() {
-            wpupostmetas_settable(table, input);
+        // Delete a line
+        tableParent.on('click', '.delete', function(e) {
+            e.preventDefault();
+            if (confirm('delete this line ?')) {
+                jQuery(this).closest('tr').remove();
+            }
         });
+        // Move a line
+        tableParent.on('click', '.down, .up', function(e) {
+            e.preventDefault();
+            var $this = jQuery(this),
+                tr = $this.closest('tr');
+            if ($this.hasClass('up')) {
+                tr.insertBefore(tr.prev());
+            }
+            else {
+                tr.insertAfter(tr.next());
+            }
+        });
+
     });
 
 };

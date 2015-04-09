@@ -126,3 +126,16 @@
     top: 0;
     left: 0;
 }
+
+.wpupostmetas-table-post-wrap .table-toolbox button {
+    visibility: hidden;
+}
+
+.wpupostmetas-table-post-wrap tr:last-child .table-toolbox .down,
+.wpupostmetas-table-post-wrap tr:first-child .table-toolbox .up {
+    display: none;
+}
+
+.wpupostmetas-table-post-wrap tr:hover .table-toolbox button {
+    visibility: visible;
+}

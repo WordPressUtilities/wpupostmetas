@@ -4,15 +4,14 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.13
+Version: 0.14
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
 License URI: http://opensource.org/licenses/MIT
 */
 
-class WPUPostMetas
-{
+class WPUPostMetas {
 
     var $boxes = array();
     var $fields = array();
@@ -180,7 +179,8 @@ class WPUPostMetas
         // First we need to check if the current user is authorised to do this action.
         if ('page' == $post_type) {
             if (!current_user_can('edit_page', $post_id)) return;
-        } else {
+        }
+        else {
             if (!current_user_can('edit_post', $post_id)) return;
         }
 
@@ -206,7 +206,8 @@ class WPUPostMetas
                                 update_post_meta($post_ID, $tmp_field_id, $field_value);
                             }
                         }
-                    } else {
+                    }
+                    else {
                         $field_value = $this->check_field_value($field_id, $field);
                         if ($field_value !== false) {
                             update_post_meta($post_ID, $field_id, $field_value);
@@ -240,7 +241,8 @@ class WPUPostMetas
                         $new_field['name'] = '[' . $idlang . '] ' . $new_field['name'];
                         $this->field_content($post, $idlang . '___' . $id, $new_field);
                     }
-                } else {
+                }
+                else {
                     $this->field_content($post, $id, $field);
                 }
             }
@@ -290,11 +292,11 @@ class WPUPostMetas
                     }
                     echo '</select>';
                     echo '</div>';
-                } else {
+                }
+                else {
                     echo '<span>' . __('No attachments', 'wpupostmetas') . '</span>';
                 }
-                break;
-
+            break;
             case 'select':
                 echo '<select ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
@@ -302,19 +304,17 @@ class WPUPostMetas
                     echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
                 }
                 echo '</select>';
-                break;
-
+            break;
             case 'radio':
                 foreach ($field['datas'] as $key => $var) {
                     $item_id = 'radio_' . $id . '_' . $key;
                     echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string)$key === (string)$value ? 'checked="checked"' : '') . ' />';
                     echo '<label for="' . $item_id . '">' . $var . '</label>';
                 }
-                break;
-
+            break;
             case 'post':
                 $wpq_post_type_field = new WP_Query(array(
-                    'posts_per_page' => -1,
+                    'posts_per_page' => - 1,
                     'no_found_rows' => true,
                     'update_post_term_cache' => false,
                     'update_post_meta_cache' => false,
@@ -331,25 +331,22 @@ class WPUPostMetas
                     echo '</select>';
                 }
                 wp_reset_postdata();
-
-                break;
-
+            break;
             case 'textarea':
             case 'htmlcontent':
                 echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
-                break;
-
+            break;
             case 'editor':
                 wp_editor($value, $id, array(
                     'textarea_rows' => 3
                 ));
-                break;
+            break;
             case 'table':
 
                 $table_columns = $field['columns'];
                 $table_width = count($table_columns);
-                $values = json_decode($value);
                 $table_basename = $id . '__';
+                $values = json_decode($value);
 
                 echo '<div class="wpupostmetas-table-post-wrap">';
                 echo '<table data-table-basename="' . $table_basename . '" class="wpupostmetas-table-post">';
@@ -358,35 +355,16 @@ class WPUPostMetas
                     echo '<th>' . $col['name'] . '</th>';
                 }
                 echo '</tr></thead>';
+                echo '<tfoot><tr><td colspan="99"><button type="button" class="plus">+</button></td></tr></tfoot>';
                 echo '<tbody>';
 
-                if (is_array($values)) {
-                    foreach ($values as $col) {
-                        echo '<tr>';
-                        foreach ($col as $col_id => $col_value) {
-                            echo '<td><input name="' . $table_basename . $col_id . '" type="text" value="' . esc_attr($col_value) . '" /></td>';
-                        }
-                        echo '</tr>';
-                    }
-                }
-                else {
-                    echo '<tr>';
-                    foreach ($table_columns as $col_id => $col_value) {
-                        echo '<td><input name="' . $table_basename . $col_id . '" type="text" value="" /></td>';
-                    }
-                    echo '</tr>';
-                }
+                echo $this->field_content_table_line($id, $table_columns, $values);
 
                 echo '</tbody>';
                 echo '</table>';
-                echo '<button type="button" class="plus">+</button>';
                 echo '<input type="hidden" ' . $idname . ' value="" />';
                 echo '<textarea class="template">';
-                echo htmlentities('<tr>');
-                foreach ($table_columns as $col_id => $col_value) {
-                    echo htmlentities('<td><input name="' . $table_basename . $col_id . '" type="text" value="" /></td>');
-                }
-                echo htmlentities('</tr>');
+                echo htmlentities($this->field_content_table_line($id, $table_columns));
 
                 echo '</textarea>';
                 echo '</div>';
@@ -397,13 +375,49 @@ class WPUPostMetas
             case 'number':
             case 'url':
                 echo '<input type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
-                break;
-
+            break;
             default:
                 echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
         }
         echo '</td>';
         echo '</tr>';
+    }
+
+    function field_content_table_line($id, $table_columns, $values = false) {
+
+        $input_type = array(
+            'text',
+            'email',
+            'number',
+            'url',
+            'color'
+        );
+        $return_html = '';
+        $table_basename = $id . '__';
+        $table_toolbox = '<td class="table-toolbox">' . '<button type="button" class="delete">&times;</button>' . '<button type="button" class="down">&darr;</button>' . '<button type="button" class="up">&uarr;</button>' . '</td>';
+
+        if (!is_array($values)) {
+            $values = array();
+            foreach ($table_columns as $col_id => $col) {
+                $values[0][$col_id] = '';
+            }
+        }
+
+        foreach ($values as $col) {
+            $return_html.= '<tr>';
+            foreach ($col as $col_id => $col_value) {
+                $main_col = $table_columns[$col_id];
+                $main_col_type = 'text';
+                if (isset($main_col['type']) && in_array($main_col['type'], $input_type)) {
+                    $main_col_type = $main_col['type'];
+                }
+
+                $return_html.= '<td><input name="' . $table_basename . $col_id . '" type="' . $main_col_type . '" value="' . esc_attr($col_value) . '" /></td>';
+            }
+            $return_html.= $table_toolbox . '</tr>';
+        }
+
+        return $return_html;
     }
 
     function list_attachments_options() {
@@ -453,36 +467,29 @@ class WPUPostMetas
         switch ($field['type']) {
             case 'attachment':
                 $return = ctype_digit($value) ? $value : false;
-                break;
-
+            break;
             case 'email':
                 $return = (filter_var($value, FILTER_VALIDATE_EMAIL) !== false || empty($value)) ? $value : false;
-                break;
-
+            break;
             case 'radio':
             case 'select':
                 $return = array_key_exists($value, $field['datas']) ? $value : false;
-                break;
-
+            break;
             case 'textarea':
                 $return = strip_tags($value);
-                break;
-
+            break;
             case 'htmlcontent':
                 $return = $value;
-                break;
-
+            break;
             case 'editor':
                 $return = $value;
-                break;
-
+            break;
             case 'table':
                 $return = $value;
             break;
             case 'url':
                 $return = (filter_var($value, FILTER_VALIDATE_URL) !== false || empty($value)) ? $value : false;
-                break;
-
+            break;
             default:
                 $return = sanitize_text_field($value);
         }
