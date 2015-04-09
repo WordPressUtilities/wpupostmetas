@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.14
+Version: 0.14.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License

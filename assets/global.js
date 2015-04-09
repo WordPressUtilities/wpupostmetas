@@ -68,6 +68,7 @@ var wpupostmetas_settables = function() {
             if (confirm('delete this line ?')) {
                 jQuery(this).closest('tr').remove();
             }
+            wpupostmetas_settable(table, input);
         });
         // Move a line
         tableParent.on('click', '.down, .up', function(e) {
@@ -80,6 +81,7 @@ var wpupostmetas_settables = function() {
             else {
                 tr.insertAfter(tr.next());
             }
+            wpupostmetas_settable(table, input);
         });
 
     });
