@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.14.2
+Version: 0.14.3
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -347,10 +347,11 @@ class WPUPostMetas {
                 $table_columns = $field['columns'];
                 $table_width = count($table_columns);
                 $table_basename = $id . '__';
+                $table_maxline = isset($field['table_maxline']) && is_numeric($field['table_maxline']) ? $field['table_maxline'] : 3;
                 $values = json_decode($value);
 
                 echo '<div class="wpupostmetas-table-post-wrap">';
-                echo '<table data-table-basename="' . $table_basename . '" class="wpupostmetas-table-post">';
+                echo '<table data-table-basename="' . $table_basename . '" data-table-maxline="' . $table_maxline . '" class="wpupostmetas-table-post">';
                 echo '<thead><tr>';
                 foreach ($table_columns as $col) {
                     echo '<th>' . $col['name'] . '</th>';

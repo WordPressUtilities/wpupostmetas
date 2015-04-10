@@ -48,6 +48,7 @@ var wpupostmetas_settables = function() {
     var tables = jQuery('.wpupostmetas-table-post');
     tables.each(function() {
         var table = jQuery(this),
+            table_maxline = parseInt(table.attr('data-table-maxline'), 10),
             tableParent = table.parent(),
             tpl = tableParent.find('.template'),
             input = tableParent.find('input[type=hidden]');
@@ -60,7 +61,10 @@ var wpupostmetas_settables = function() {
         // Add a new line
         tableParent.on('click', '.plus', function(e) {
             e.preventDefault();
-            table.append(jQuery(tpl.val()));
+            var nbLines = tableParent.find('tbody tr').length;
+            if (nbLines < table_maxline) {
+                table.append(jQuery(tpl.val()));
+            }
         });
         // Delete a line
         tableParent.on('click', '.delete', function(e) {
