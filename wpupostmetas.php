@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.14.3
+Version: 0.14.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -634,7 +634,7 @@ $WPUPostMetas = new WPUPostMetas();
 ---------------------------------------------------------- */
 
 /**
- * Get an option value with l18n
+ * Get an option value with l10n
  *
  * @param integer  $post_id
  * @param string  $name
@@ -642,15 +642,15 @@ $WPUPostMetas = new WPUPostMetas();
  *
  * @return mixed
  */
-function wputh_l18n_get_post_meta($id, $name, $single) {
+function wputh_l10n_get_post_meta($id, $name, $single) {
     global $q_config;
 
     $meta = get_post_meta($id, $name, $single);
 
     if (isset($q_config['language'])) {
-        $meta_l18n = get_post_meta($id, $q_config['language'] . '___' . $name, $single);
-        if (!empty($meta_l18n)) {
-            $meta = $meta_l18n;
+        $meta_l10n = get_post_meta($id, $q_config['language'] . '___' . $name, $single);
+        if (!empty($meta_l10n)) {
+            $meta = $meta_l10n;
         }
     }
 
