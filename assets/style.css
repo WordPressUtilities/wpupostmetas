@@ -45,6 +45,17 @@
     padding-top: 15px;
 }
 
+/* Help
+-------------------------- */
+
+.wpupostmetas-description-help {
+    clear: both;
+    padding: 0.1em 0;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #555;
+}
+
 /* Fields
 -------------------------- */
 
@@ -115,8 +126,10 @@
 
 .wpupostmetas-table-post-wrap {
     padding: 10px;
+    max-height: 500px;
     border: 1px solid #e0e0e0;
-    background-color: #f0f0f0;
+    overflow: auto;
+    background-color: #f6f6f6;
 }
 
 .wpupostmetas-table-post-wrap .template {

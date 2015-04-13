@@ -37,7 +37,7 @@ var wpupostmetas_groupArray = function(arr, options) {
 
 var wpupostmetas_settable = function(table, input) {
     var table_basename = table.attr('data-table-basename');
-    var results = wpupostmetas_groupArray(table.find('input').serializeArray(), {
+    var results = wpupostmetas_groupArray(table.find('[name]').serializeArray(), {
         basename: table_basename,
         cols: table.find('thead th').length
     });
@@ -55,7 +55,7 @@ var wpupostmetas_settables = function() {
 
         wpupostmetas_settable(table, input);
         // Save values in field
-        table.on('change keydown keyup', 'input', function() {
+        table.on('change keydown keyup', '[name]', function() {
             wpupostmetas_settable(table, input);
         });
         // Add a new line

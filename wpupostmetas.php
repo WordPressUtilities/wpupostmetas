@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.14.4
+Version: 0.15
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -257,31 +257,54 @@ class WPUPostMetas {
      * @param unknown $id
      * @param unknown $field
      */
-    function field_content($post, $id, $field) {
-        $value = trim(get_post_meta($post->ID, $id, true));
+    function field_content($post, $id, $field, $only_field = false, $val = false) {
+        $value = '';
+        $main_post_id = 0;
+        if (is_object($post)) {
+            $main_post_id = $post->ID;
+            $value = @trim(get_post_meta($main_post_id, $id, true));
 
-        // If new post, try to load a default value
-        if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
-            $value = $field['default'];
+            // If new post, try to load a default value
+            if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
+                $value = $field['default'];
+            }
+        }
+        if ($val !== false) {
+            $value = $val;
         }
         $el_id = 'el_id_' . $id;
-        $idname = 'id="' . $el_id . '" name="' . $id . '"';
-        echo '<tr>';
-        echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></th>';
-        echo '<td valign="top">';
+        $idname = 'name="' . $id . '"';
+        if ($only_field === false) {
+            $idname = 'id="' . $el_id . '" name="' . $id . '"';
+            echo '<tr>';
+            echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></th>';
+            echo '<td valign="top">';
+        }
+        $field_datas = array(
+            'Yes',
+            'No'
+        );
+        if (isset($field['datas'])) {
+            $field_datas = $field['datas'];
+        }
+
+        if (!isset($field['type'])) {
+            $field['type'] = '';
+        }
+
         switch ($field['type']) {
             case 'attachment':
                 $args = array(
                     'post_type' => 'attachment',
                     'posts_per_page' => - 1,
                     'post_status' => 'any',
-                    'post_parent' => $post->ID
+                    'post_parent' => $main_post_id
                 );
                 $attachments = get_posts($args);
                 if ($attachments) {
                     echo '<div class="wpupostmetas-attachments__container"><span class="before"></span>';
                     echo '<div class="preview-img" id="preview-' . $id . '"></div>';
-                    echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $post->ID . '" data-postvalue="' . $value . '">';
+                    echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
                     echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
                     foreach ($attachments as $attachment) {
                         $data_guid = '';
@@ -300,13 +323,13 @@ class WPUPostMetas {
             case 'select':
                 echo '<select ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
-                foreach ($field['datas'] as $key => $var) {
+                foreach ($field_datas as $key => $var) {
                     echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
                 }
                 echo '</select>';
             break;
             case 'radio':
-                foreach ($field['datas'] as $key => $var) {
+                foreach ($field_datas as $key => $var) {
                     $item_id = 'radio_' . $id . '_' . $key;
                     echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string)$key === (string)$value ? 'checked="checked"' : '') . ' />';
                     echo '<label for="' . $item_id . '">' . $var . '</label>';
@@ -347,8 +370,8 @@ class WPUPostMetas {
                 $table_columns = $field['columns'];
                 $table_width = count($table_columns);
                 $table_basename = $id . '__';
-                $table_maxline = isset($field['table_maxline']) && is_numeric($field['table_maxline']) ? $field['table_maxline'] : 3;
-                $values = json_decode($value);
+                $table_maxline = isset($field['table_maxline']) && is_numeric($field['table_maxline']) ? $field['table_maxline'] : 10;
+                $values = json_decode($value, true);
 
                 echo '<div class="wpupostmetas-table-post-wrap">';
                 echo '<table data-table-basename="' . $table_basename . '" data-table-maxline="' . $table_maxline . '" class="wpupostmetas-table-post">';
@@ -381,19 +404,17 @@ class WPUPostMetas {
             default:
                 echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
         }
-        echo '</td>';
-        echo '</tr>';
+        if (isset($field['help'])) {
+            echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
+        }
+        if ($only_field === false) {
+            echo '</td>';
+            echo '</tr>';
+        }
     }
 
     function field_content_table_line($id, $table_columns, $values = false) {
 
-        $input_type = array(
-            'text',
-            'email',
-            'number',
-            'url',
-            'color'
-        );
         $return_html = '';
         $table_basename = $id . '__';
         $table_toolbox = '<td class="table-toolbox">' . '<button type="button" class="delete">&times;</button>' . '<button type="button" class="down">&darr;</button>' . '<button type="button" class="up">&uarr;</button>' . '</td>';
@@ -406,15 +427,24 @@ class WPUPostMetas {
         }
 
         foreach ($values as $col) {
+
+            foreach ($table_columns as $col_id => $col_value) {
+                if (!isset($col[$col_id])) {
+                    $col[$col_id] = '';
+                }
+            }
+
             $return_html.= '<tr>';
             foreach ($col as $col_id => $col_value) {
-                $main_col = $table_columns[$col_id];
-                $main_col_type = 'text';
-                if (isset($main_col['type']) && in_array($main_col['type'], $input_type)) {
-                    $main_col_type = $main_col['type'];
+                if (!isset($table_columns[$col_id])) {
+                    continue;
                 }
-
-                $return_html.= '<td><input name="' . $table_basename . $col_id . '" type="' . $main_col_type . '" value="' . esc_attr($col_value) . '" /></td>';
+                $main_col = $table_columns[$col_id];
+                $return_html.= '<td>';
+                ob_start();
+                $this->field_content(false, $table_basename . $col_id, $main_col, true, $col_value);
+                $return_html.= ob_get_clean();
+                $return_html.= '</td>';
             }
             $return_html.= $table_toolbox . '</tr>';
         }
@@ -488,6 +518,9 @@ class WPUPostMetas {
             break;
             case 'table':
                 $return = $value;
+                if (!is_array(json_decode(stripslashes($value), true))) {
+                    $return = array();
+                }
             break;
             case 'url':
                 $return = (filter_var($value, FILTER_VALIDATE_URL) !== false || empty($value)) ? $value : false;
