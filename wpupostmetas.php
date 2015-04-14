@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.15.1
+Version: 0.15.1.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -440,7 +440,7 @@ class WPUPostMetas {
                 }
                 $return_html.= '<td>';
                 ob_start();
-                $this->field_content(false, $table_basename . $col_id, $main_col, true, $value);
+                $this->field_content(false, $table_basename . $col_id, $col_value, true, $value);
                 $return_html.= ob_get_clean();
                 $return_html.= '</td>';
             }
