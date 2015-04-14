@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.15
+Version: 0.15.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -21,7 +21,9 @@ class WPUPostMetas {
      */
     function __construct() {
         if (is_admin()) {
-            load_plugin_textdomain('wpupostmetas', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+            add_action('plugins_loaded', array(&$this,
+                'load_plugin_textdomain'
+            ));
             add_action('add_meta_boxes', array(
                 $this,
                 'add_custom_box'
@@ -45,6 +47,10 @@ class WPUPostMetas {
     function init() {
         $this->load_fields();
         $this->set_admin_columns();
+    }
+
+    function load_plugin_textdomain() {
+        load_plugin_textdomain('wpupostmetas', false, dirname(plugin_basename(__FILE__)) . '/lang/');
     }
 
     function load_assets() {
@@ -425,24 +431,16 @@ class WPUPostMetas {
                 $values[0][$col_id] = '';
             }
         }
-
         foreach ($values as $col) {
-
-            foreach ($table_columns as $col_id => $col_value) {
-                if (!isset($col[$col_id])) {
-                    $col[$col_id] = '';
-                }
-            }
-
             $return_html.= '<tr>';
-            foreach ($col as $col_id => $col_value) {
-                if (!isset($table_columns[$col_id])) {
-                    continue;
+            foreach ($table_columns as $col_id => $col_value) {
+                $value = '';
+                if (isset($col[$col_id])) {
+                    $value = $col[$col_id];
                 }
-                $main_col = $table_columns[$col_id];
                 $return_html.= '<td>';
                 ob_start();
-                $this->field_content(false, $table_basename . $col_id, $main_col, true, $col_value);
+                $this->field_content(false, $table_basename . $col_id, $main_col, true, $value);
                 $return_html.= ob_get_clean();
                 $return_html.= '</td>';
             }
@@ -455,7 +453,6 @@ class WPUPostMetas {
     function list_attachments_options() {
         global $wpdb;
 
-        // this is how you get access to the database
         if (!isset($_POST['post_id'], $_POST['post_value']) || !is_numeric($_POST['post_id'])) {
             die();
         }
@@ -466,6 +463,7 @@ class WPUPostMetas {
             'post_parent' => $_POST['post_id']
         );
         $attachments = get_posts($args);
+        echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
         foreach ($attachments as $attachment) {
             $data_guid = '';
             if (strpos($attachment->post_mime_type, 'image/') !== false) {
@@ -518,7 +516,7 @@ class WPUPostMetas {
             break;
             case 'table':
                 $return = $value;
-                if (!is_array(json_decode(stripslashes($value), true))) {
+                if (!is_array(json_decode(stripslashes($value) , true))) {
                     $return = array();
                 }
             break;
