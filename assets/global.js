@@ -10,9 +10,34 @@ jQuery(document).ready(function() {
         wpupostmetas_setattachmentrefresh(self);
     });
 
+    wpupostmetas_setmultilingual();
     wpupostmetas_settables();
 
 });
+
+/* ----------------------------------------------------------
+  Multilingual
+---------------------------------------------------------- */
+
+var wpupostmetas_setmultilingual = function() {
+    var display_line = function(table, i) {
+        var lines = table.find('tr'),
+            pagers = table.find('[data-i]');
+        lines.removeClass('is-visible');
+        lines.eq(i).addClass('is-visible');
+
+        pagers.removeClass('current');
+        pagers.eq(i).addClass('current');
+    };
+    jQuery('.multilingual-wrapper').each(function() {
+        var $this = jQuery(this);
+        display_line($this, 0);
+        $this.on('click', '[data-i]', function(e) {
+            e.preventDefault();
+            display_line($this, parseInt(jQuery(this).attr('data-i'), 20));
+        });
+    });
+};
 
 /* ----------------------------------------------------------
   Set tables

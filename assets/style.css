@@ -152,3 +152,47 @@
 .wpupostmetas-table-post-wrap tr:hover .table-toolbox button {
     visibility: visible;
 }
+
+/* ----------------------------------------------------------
+  Multilingual wrapper
+---------------------------------------------------------- */
+
+.multilingual-wrapper {
+    z-index: 1;
+    position: relative;
+    margin-top: 25px;
+    padding: 5px;
+    background-color: #f0f0f0;
+}
+
+.multilingual-toolbox {
+    z-index: 1;
+    position: absolute;
+    top: -25px;
+    left: 0;
+    font-size: 12px;
+    line-height: 25px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.multilingual-toolbox [data-i] {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 0 6px;
+    vertical-align: middle;
+    color: #999;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.multilingual-toolbox .current {
+    color: #000;
+    background-color: #f0f0f0;
+}
+
+.wpupostmetas-table--multilingual tr:not(.is-visible) {
+    display: none;
+}

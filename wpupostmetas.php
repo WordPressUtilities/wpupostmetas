@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.15.3
+Version: 0.15.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -242,11 +242,19 @@ class WPUPostMetas {
 
                 // Multilingual field
                 if (isset($field['lang']) && $field['lang'] && !empty($languages)) {
+                    echo '<tr><td colspan="99"><div class="multilingual-wrapper">';
+                    echo '<div class="multilingual-toolbox">';
+                    $i = 0;
                     foreach ($languages as $idlang => $lang) {
-                        $new_field = $field;
-                        $new_field['name'] = '[' . $idlang . '] ' . $new_field['name'];
-                        $this->field_content($post, $idlang . '___' . $id, $new_field);
+                        echo ' <span data-i="' . $i . '">' . $lang . '</span> ';
+                        $i++;
                     }
+                    echo '</div>';
+                    echo '<table class="wpupostmetas-table wpupostmetas-table--multilingual">';
+                    foreach ($languages as $idlang => $lang) {
+                        $this->field_content($post, $idlang . '___' . $id, $field);
+                    }
+                    echo '</table></div></td></tr>';
                 }
                 else {
                     $this->field_content($post, $id, $field);
