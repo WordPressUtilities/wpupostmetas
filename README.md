@@ -14,29 +14,32 @@ How to add boxes :
 
 Put the code below in your theme's functions.php file. Add new boxes to your convenance.
 
-    add_filter( 'wputh_post_metas_boxes', 'set_wputh_post_metas_boxes', 10, 3 );
-    function set_wputh_post_metas_boxes( $boxes ) {
-        $boxes['box_address'] = array(
-            'name' => 'Box name',
-            'post_type' => array( 'post', 'page' )
-        );
-        return $boxes;
-    }
+```php
+add_filter( 'wputh_post_metas_boxes', 'set_wputh_post_metas_boxes', 10, 3 );
+function set_wputh_post_metas_boxes( $boxes ) {
+    $boxes['box_address'] = array(
+        'name' => 'Box name',
+        'post_type' => array( 'post', 'page' )
+    );
+    return $boxes;
+}
+```
 
 How to add fields :
 --
 
 Put the code below in your theme's functions.php file. Add new fields to your convenance.
 
-    add_filter( 'wputh_post_metas_fields', 'set_wputh_post_metas_fields', 10, 3 );
-    function set_wputh_post_metas_fields( $fields ) {
-        $fields['wputh_post_address'] = array(
-            'box' => 'box_address',
-            'name' => 'Address',
-        );
-        return $fields;
-    }
-
+```php
+add_filter( 'wputh_post_metas_fields', 'set_wputh_post_metas_fields', 10, 3 );
+function set_wputh_post_metas_fields( $fields ) {
+    $fields['wputh_post_address'] = array(
+        'box' => 'box_address',
+        'name' => 'Address',
+    );
+    return $fields;
+}
+```
 
 Thanks
 --
