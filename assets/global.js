@@ -21,7 +21,7 @@ jQuery(document).ready(function() {
 
 var wpupostmetas_setmultilingual = function() {
     var display_line = function(table, i) {
-        var lines = table.find('tr'),
+        var lines = table.find('.wpupostmetas-table--multilingual > tbody > tr'),
             pagers = table.find('[data-i]');
         lines.removeClass('is-visible');
         lines.eq(i).addClass('is-visible');
