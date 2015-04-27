@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.15.5
+Version: 0.16
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -692,16 +692,39 @@ $WPUPostMetas = new WPUPostMetas();
  *
  * @return mixed
  */
-function wputh_l10n_get_post_meta($id, $name, $single) {
+function wputh_l10n_get_post_meta($id, $name, $single, $lang = false) {
     global $q_config;
 
     $meta = get_post_meta($id, $name, $single);
 
+    /* Define lang */
+
+    if($lang === false){
+        if (isset($q_config['language'])) {
+            $lang = $q_config['language'];
+        }
+    }
+
+    /* Get meta value */
+
     if (isset($q_config['language'])) {
-        $meta_l10n = get_post_meta($id, $q_config['language'] . '___' . $name, $single);
+        $meta_l10n = get_post_meta($id, $lang . '___' . $name, $single);
         if (!empty($meta_l10n)) {
             $meta = $meta_l10n;
         }
+    }
+
+    /* Use default language value */
+
+    $default_language = '';
+    if (isset($q_config['language'])) {
+        $default_language = $q_config['enabled_languages'][0];
+    }
+    $default_language = apply_filters('wputh_l10n_get_post_meta__defaultlang', $default_language);
+
+    $use_default = apply_filters('wputh_l10n_get_post_meta__usedefaultlang', true);
+    if(empty($meta) && $use_default && $lang != $default_language){
+        return wputh_l10n_get_post_meta($id, $name, $single, $default_language);
     }
 
     return $meta;
