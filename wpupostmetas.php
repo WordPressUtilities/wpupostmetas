@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.16.1
+Version: 0.17
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -68,6 +68,7 @@ class WPUPostMetas {
     function set_admin_columns() {
 
         $this->admin_columns = array();
+        $this->admin_columns_sortable = array();
         foreach ($this->boxes as $box) {
             if (isset($box['post_type']) && is_array($box['post_type'])) {
                 foreach ($box['post_type'] as $post_type) {
@@ -80,16 +81,46 @@ class WPUPostMetas {
                 continue;
             }
             $this->admin_columns[$post_type][$field_id] = $field;
+            if ($field['admin_column_sortable'] === true) {
+                $this->admin_columns_sortable['wpupostmetas_' . $field_id] = $field_id;
+            }
         }
 
         foreach ($this->admin_columns as $post_type => $values) {
+            if (empty($values)) {
+                continue;
+            }
             add_filter('manage_edit-' . $post_type . '_columns', array(&$this,
                 'set_columns_head'
-            ));
+            ) , 10, 2);
             add_action('manage_' . $post_type . '_posts_custom_column', array(&$this,
                 'set_columns_content'
             ) , 10, 2);
+            add_filter('manage_edit-' . $post_type . '_sortable_columns', array(&$this,
+                'set_columns_sortable'
+            ) , 10, 2);
+            add_action('pre_get_posts', array(&$this,
+                'set_columns_sortable_orderby'
+            ));
         }
+    }
+
+    function set_columns_sortable_orderby($query) {
+
+        $orderby = $query->get('orderby');
+        foreach ($this->admin_columns_sortable as $key => $val) {
+            if ($val == $orderby) {
+                $query->set('meta_key', $val);
+            }
+        }
+    }
+
+    // Sort columns
+    function set_columns_sortable($columns) {
+        foreach ($this->admin_columns_sortable as $key => $val) {
+            $columns[$key] = $val;
+        }
+        return $columns;
     }
 
     // Display columns header
@@ -699,7 +730,7 @@ function wputh_l10n_get_post_meta($id, $name, $single, $lang = false) {
 
     /* Define lang */
 
-    if($lang === false){
+    if ($lang === false) {
         if (isset($q_config['language'])) {
             $lang = $q_config['language'];
         }
@@ -723,7 +754,7 @@ function wputh_l10n_get_post_meta($id, $name, $single, $lang = false) {
     $default_language = apply_filters('wputh_l10n_get_post_meta__defaultlang', $default_language);
 
     $use_default = apply_filters('wputh_l10n_get_post_meta__usedefaultlang', true);
-    if(empty($meta) && $use_default && $lang != $default_language){
+    if (empty($meta) && $use_default && $lang != $default_language) {
         return wputh_l10n_get_post_meta($id, $name, $single, $default_language);
     }
 
