@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.17
+Version: 0.17.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -126,8 +126,9 @@ class WPUPostMetas {
     // Display columns header
     function set_columns_head($defaults) {
         global $post;
+        $current_post_type = get_query_var('post_type');
         foreach ($this->admin_columns as $post_type => $values) {
-            if ($post_type == $post->post_type) {
+            if ($post_type == $current_post_type) {
                 foreach ($values as $field_id => $field) {
                     $defaults['wpupostmetas_' . $field_id] = $field['name'];
                 }
