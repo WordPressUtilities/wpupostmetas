@@ -44,4 +44,4 @@ function set_wputh_post_metas_fields( $fields ) {
 Thanks
 --
 
-* Thanks to Yummygum for his reload icon http://www.iconsweets2.com/
+* Thanks to Yummygum for their reload icon http://www.iconsweets2.com/
