@@ -68,6 +68,11 @@
     margin-left: 20px;
 }
 
+.wpupostmetas-table input,
+.wpupostmetas-table textarea {
+    max-width: 100%;
+}
+
 /* Attachment
 -------------------------- */
 

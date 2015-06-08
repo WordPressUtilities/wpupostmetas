@@ -13,6 +13,11 @@ jQuery(document).ready(function() {
     wpupostmetas_setmultilingual();
     wpupostmetas_settables();
 
+    if (qTranslateConfig && typeof qTranslateConfig == 'object') {
+        jQuery('.multilingual-wrapper .wp-editor-area.qtranxs-translatable').each(function() {
+            qTranslateConfig.qtx.removeContentHook(this);
+        });
+    }
 });
 
 /* ----------------------------------------------------------

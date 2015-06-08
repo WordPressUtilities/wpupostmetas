@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.18
+Version: 0.18.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -13,8 +13,9 @@ License URI: http://opensource.org/licenses/MIT
 
 class WPUPostMetas {
 
-    var $boxes = array();
-    var $fields = array();
+    public $boxes = array();
+    public $fields = array();
+    public $version = '0.18.1';
 
     /**
      * Initialize class
@@ -56,8 +57,8 @@ class WPUPostMetas {
     function load_assets() {
         $screen = get_current_screen();
         if ($screen->base == 'post') {
-            wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__));
-            wp_enqueue_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__));
+            wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__) , array() , $this->version);
+            wp_enqueue_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__) , array() , $this->version);
         }
     }
 
