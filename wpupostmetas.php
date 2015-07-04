@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.18.2
+Version: 0.18.3
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.18.2';
+    public $version = '0.18.3';
 
     /**
      * Initialize class
@@ -474,6 +474,7 @@ class WPUPostMetas {
 
     function field_content_table_line($id, $table_columns, $values = false) {
 
+        $demo_line = ($values == false);
         $return_html = '';
         $table_basename = $id . '__';
         $table_toolbox = '<td class="table-toolbox">' . '<button type="button" class="delete">&times;</button>' . '<button type="button" class="down">&darr;</button>' . '<button type="button" class="up">&uarr;</button>' . '</td>';
@@ -485,19 +486,26 @@ class WPUPostMetas {
             }
         }
         foreach ($values as $col) {
-            $return_html.= '<tr>';
+            $return_html_line = '<tr>';
+            $has_filled_value = false;
             foreach ($table_columns as $col_id => $col_value) {
                 $value = '';
                 if (isset($col[$col_id])) {
                     $value = $col[$col_id];
                 }
-                $return_html.= '<td>';
+                if (!empty($value)) {
+                    $has_filled_value = true;
+                }
+                $return_html_line.= '<td>';
                 ob_start();
                 $this->field_content(false, $table_basename . $col_id, $col_value, true, $value);
-                $return_html.= ob_get_clean();
-                $return_html.= '</td>';
+                $return_html_line.= ob_get_clean();
+                $return_html_line.= '</td>';
             }
-            $return_html.= $table_toolbox . '</tr>';
+            $return_html_line.= $table_toolbox . '</tr>';
+            if ($has_filled_value || $demo_line) {
+                $return_html.= $return_html_line;
+            }
         }
 
         return $return_html;
