@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.18.3
+Version: 0.18.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.18.3';
+    public $version = '0.18.4';
 
     /**
      * Initialize class
@@ -70,20 +70,24 @@ class WPUPostMetas {
 
         $this->admin_columns = array();
         $this->admin_columns_sortable = array();
-        foreach ($this->boxes as $box) {
+        foreach ($this->boxes as $box_id => $box) {
             if (isset($box['post_type']) && is_array($box['post_type'])) {
                 foreach ($box['post_type'] as $post_type) {
-                    $this->admin_columns[$post_type] = array();
+                    if (!isset($this->admin_columns[$post_type])) {
+                        $this->admin_columns[$post_type] = array();
+                    }
+                    foreach ($this->fields as $field_id => $field) {
+
+                        if ($field['admin_column'] !== true || $field['box'] != $box_id) {
+                            continue;
+                        }
+
+                        $this->admin_columns[$post_type][$field_id] = $field;
+                        if (isset($field['admin_column_sortable']) && $field['admin_column_sortable'] === true) {
+                            $this->admin_columns_sortable['wpupostmetas_' . $field_id] = $field_id;
+                        }
+                    }
                 }
-            }
-        }
-        foreach ($this->fields as $field_id => $field) {
-            if ($field['admin_column'] !== true) {
-                continue;
-            }
-            $this->admin_columns[$post_type][$field_id] = $field;
-            if ($field['admin_column_sortable'] === true) {
-                $this->admin_columns_sortable['wpupostmetas_' . $field_id] = $field_id;
             }
         }
 
