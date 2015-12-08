@@ -99,7 +99,7 @@ var wpupostmetas_settables = function() {
         // Delete a line
         tableParent.on('click', '.delete', function(e) {
             e.preventDefault();
-            if (confirm('delete this line ?')) {
+            if (confirm(wpupostmetas_tra.delete_line_txt)) {
                 jQuery(this).closest('tr').remove();
             }
             wpupostmetas_settable(table, input);

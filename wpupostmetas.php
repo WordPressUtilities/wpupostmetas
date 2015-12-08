@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.18.4
+Version: 0.18.5
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.18.4';
+    public $version = '0.18.5';
 
     /**
      * Initialize class
@@ -56,9 +56,15 @@ class WPUPostMetas {
 
     function load_assets() {
         $screen = get_current_screen();
+        wp_register_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__) , array() , $this->version);
+
+        // Localize the script with new data
+        wp_localize_script('wpupostmetas_scripts', 'wpupostmetas_tra', array(
+            'delete_line_txt' => __('Delete this line?', 'wpupostmetas')
+        ));
         if ($screen->base == 'post') {
             wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__) , array() , $this->version);
-            wp_enqueue_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__) , array() , $this->version);
+            wp_enqueue_script('wpupostmetas_scripts');
         }
     }
 
@@ -439,8 +445,8 @@ class WPUPostMetas {
                 echo '<div class="wpupostmetas-table-post-wrap">';
                 echo '<table data-table-basename="' . $table_basename . '" data-table-maxline="' . $table_maxline . '" class="wpupostmetas-table-post">';
                 echo '<thead><tr>';
-                foreach ($table_columns as $col) {
-                    echo '<th>' . $col['name'] . '</th>';
+                foreach ($table_columns as $col_id => $col) {
+                    echo '<th>' . (isset($col['name']) ? $col['name'] : ucfirst($col_id)) . '</th>';
                 }
                 echo '</tr></thead>';
                 echo '<tfoot><tr><td colspan="99"><button type="button" class="plus">+</button></td></tr></tfoot>';
