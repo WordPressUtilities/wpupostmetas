@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: http://github.com/Darklg/WPUtilities
 Description: Simple admin for post metas
-Version: 0.18.5
+Version: 0.19
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.18.5';
+    public $version = '0.19';
 
     /**
      * Initialize class
@@ -35,6 +35,9 @@ class WPUPostMetas {
             ));
             add_action('admin_enqueue_scripts', array(&$this,
                 'load_assets'
+            ));
+            add_action('qtranslate_add_admin_footer_js', array(&$this,
+                'load_assets_qtranslatex'
             ));
             add_action('wp_ajax_wpupostmetas_attachments', array(&$this,
                 'list_attachments_options'
@@ -66,6 +69,10 @@ class WPUPostMetas {
             wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__) , array() , $this->version);
             wp_enqueue_script('wpupostmetas_scripts');
         }
+    }
+
+    function load_assets_qtranslatex() {
+        wp_enqueue_script('wpupostmetas_qtranslatex', plugins_url('assets/qtranslatex.js', __FILE__) , array() , $this->version);
     }
 
     /*
@@ -290,19 +297,24 @@ class WPUPostMetas {
 
                 // Multilingual field
                 if (isset($field['lang']) && $field['lang'] && !empty($languages)) {
-                    echo '<tr><td colspan="2"><div class="multilingual-wrapper">';
-                    echo '<div class="multilingual-toolbox">';
-                    $i = 0;
-                    foreach ($languages as $idlang => $lang) {
-                        echo ' <span data-i="' . $i . '">' . $lang . '</span> ';
-                        $i++;
+
+                    if (!$this->qtranslatex) {
+                        echo '<tr><td colspan="2"><div class="multilingual-wrapper">';
+                        echo '<div class="multilingual-toolbox">';
+                        foreach ($languages as $idlang => $lang) {
+                            echo ' <span data-i="' . $id . '">' . $lang . '</span> ';
+                        }
+                        echo '</div>';
+                        echo '<table class="wpupostmetas-table wpupostmetas-table--multilingual">';
                     }
-                    echo '</div>';
-                    echo '<table class="wpupostmetas-table wpupostmetas-table--multilingual">';
+
                     foreach ($languages as $idlang => $lang) {
-                        $this->field_content($post, $idlang . '___' . $id, $field);
+                        $this->field_content($post, $idlang . '___' . $id, $field, false, false, $idlang);
                     }
-                    echo '</table></div></td></tr>';
+
+                    if (!$this->qtranslatex) {
+                        echo '</table></div></td></tr>';
+                    }
                 }
                 else {
                     $this->field_content($post, $id, $field);
@@ -319,7 +331,7 @@ class WPUPostMetas {
      * @param unknown $id
      * @param unknown $field
      */
-    function field_content($post, $id, $field, $only_field = false, $val = false) {
+    function field_content($post, $id, $field, $only_field = false, $val = false, $id_lang = false) {
         $value = '';
         $main_post_id = 0;
         if (is_object($post)) {
@@ -338,10 +350,14 @@ class WPUPostMetas {
         $idname = 'name="' . $id . '"';
         if ($only_field === false) {
             $idname = 'id="' . $el_id . '" name="' . $id . '"';
-            echo '<tr>';
+            echo '<tr ' . ($id_lang !== false ? 'data-wpupostmetaslang="' . $id_lang . '"' : '') . '>';
             echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></th>';
             echo '<td valign="top">';
+            if ($id_lang !== false) {
+                echo '<div class="qtranxs-translatable">';
+            }
         }
+
         $field_datas = array(
             'Yes',
             'No'
@@ -477,6 +493,9 @@ class WPUPostMetas {
             echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
         }
         if ($only_field === false) {
+            if ($id_lang !== false) {
+                echo '</div>';
+            }
             echo '</td>';
             echo '</tr>';
         }
@@ -719,10 +738,16 @@ class WPUPostMetas {
      */
     private function get_languages() {
         global $q_config;
+        $this->qtranslate = false;
+        $this->qtranslatex = false;
         $languages = array();
 
         // Obtaining from Qtranslate
         if (isset($q_config['enabled_languages'])) {
+            $this->qtranslate = true;
+            if (defined('QTX_VERSION')) {
+                $this->qtranslatex = true;
+            }
             foreach ($q_config['enabled_languages'] as $lang) {
                 if (!in_array($lang, $languages) && isset($q_config['language_name'][$lang])) {
                     $languages[$lang] = $q_config['language_name'][$lang];
