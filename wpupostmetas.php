@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: WPU Post Metas
-Plugin URI: http://github.com/Darklg/WPUtilities
+Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
 Version: 0.19
 Author: Darklg
