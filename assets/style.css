@@ -126,6 +126,16 @@
     vertical-align: middle;
 }
 
+.wpupostmetas-attachments__container .no-attachments,
+.wpupostmetas-attachments__container[data-attachment-count="0"] select,
+.wpupostmetas-attachments__container[data-attachment-count="0"] .preview-img {
+    display: none;
+}
+
+.wpupostmetas-attachments__container[data-attachment-count="0"] .no-attachments {
+    display: inline;
+}
+
 /* Table
 -------------------------- */
 
@@ -144,6 +154,15 @@
     position: absolute;
     top: 0;
     left: 0;
+}
+
+.wpupostmetas-table-post-wrap button {
+    cursor: pointer;
+}
+
+.wpupostmetas-table-post-wrap button .dashicons {
+    margin-right: 3px;
+    vertical-align: -4px;
 }
 
 .wpupostmetas-table-post-wrap .table-toolbox button {

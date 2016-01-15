@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.19
+Version: 0.20
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.19';
+    public $version = '0.20';
 
     /**
      * Initialize class
@@ -379,24 +379,20 @@ class WPUPostMetas {
                     'post_parent' => $main_post_id
                 );
                 $attachments = get_posts($args);
-                if ($attachments) {
-                    echo '<div class="wpupostmetas-attachments__container"><span class="before"></span>';
-                    echo '<div class="preview-img" id="preview-' . $id . '"></div>';
-                    echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
-                    echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
-                    foreach ($attachments as $attachment) {
-                        $data_guid = '';
-                        if (strpos($attachment->post_mime_type, 'image/') !== false) {
-                            $data_guid = 'data-guid="' . $attachment->guid . '"';
-                        }
-                        echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
+                echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
+                echo '<div class="preview-img" id="preview-' . $id . '"></div>';
+                echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
+                echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
+                foreach ($attachments as $attachment) {
+                    $data_guid = '';
+                    if (strpos($attachment->post_mime_type, 'image/') !== false) {
+                        $data_guid = 'data-guid="' . $attachment->guid . '"';
                     }
-                    echo '</select>';
-                    echo '</div>';
+                    echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
                 }
-                else {
-                    echo '<span>' . __('No attachments', 'wpupostmetas') . '</span>';
-                }
+                echo '</select>';
+                echo '<span class="no-attachments">' . __('No attachments', 'wpupostmetas') . '</span>';
+                echo '</div>';
             break;
             case 'select':
                 echo '<select ' . $idname . '>';
@@ -465,7 +461,10 @@ class WPUPostMetas {
                     echo '<th>' . (isset($col['name']) ? $col['name'] : ucfirst($col_id)) . '</th>';
                 }
                 echo '</tr></thead>';
-                echo '<tfoot><tr><td colspan="99"><button type="button" class="plus">+</button></td></tr></tfoot>';
+                echo '<tfoot><tr><td colspan="99">';
+                echo '<button type="button" class="button-secondary plus" title="' . __('Add a new line', 'wpupostmetas') . '"><span class="dashicons dashicons-welcome-add-page"></span> ' . __('Add a new line', 'wpupostmetas') . '</button> ';
+                echo '<button type="button" class="button-secondary copy" title="' . __('Copy last line', 'wpupostmetas') . '"><span class="dashicons dashicons-admin-appearance"></span> ' . __('Copy last line', 'wpupostmetas') . '</button>';
+                echo '</td></tr></tfoot>';
                 echo '<tbody>';
 
                 echo $this->field_content_table_line($id, $table_columns, $values);

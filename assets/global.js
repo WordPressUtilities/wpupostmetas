@@ -96,6 +96,15 @@ var wpupostmetas_settables = function() {
                 table.append(jQuery(tpl.val()));
             }
         });
+        // Copy last line
+        tableParent.on('click', '.copy', function(e) {
+            e.preventDefault();
+            var nbLines = tableParent.find('tbody tr').length;
+            if (nbLines < table_maxline) {
+                var lastline = '<tr>' + tableParent.find('tbody tr:last-child').html() + '</tr>';
+                table.append(jQuery(lastline));
+            }
+        });
         // Delete a line
         tableParent.on('click', '.delete', function(e) {
             e.preventDefault();
@@ -142,7 +151,7 @@ var wpupostmetas_setattachmentrefresh = function(self) {
         }, function(response) {
             self.html(response);
             /* Enable click */
-            sparent.removeClass('is-disabled');
+            sparent.removeClass('is-disabled').attr('data-attachment-count', self.find('option').length - 1);
             /* Reload select */
             wpupostmetas_setattachmentpreview(self);
         });
