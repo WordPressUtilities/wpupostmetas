@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.20
+Version: 0.20.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.20';
+    public $version = '0.20.1';
 
     /**
      * Initialize class
@@ -342,6 +342,15 @@ class WPUPostMetas {
             if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
                 $value = $field['default'];
             }
+
+            // Test if non single value contains an empty value
+            if (isset($field['default']) && empty($value)) {
+                $arr_post_meta = get_post_meta($main_post_id, $id, false);
+                if (!isset($arr_post_meta[0])) {
+                    $value = $field['default'];
+                    $i = update_post_meta($main_post_id, $id, $value);
+                }
+            }
         }
         if ($val !== false) {
             $value = $val;
@@ -358,16 +367,8 @@ class WPUPostMetas {
             }
         }
 
-        $field_datas = array(
-            'Yes',
-            'No'
-        );
-        if (isset($field['datas'])) {
-            $field_datas = $field['datas'];
-        }
-
-        if (!isset($field['type'])) {
-            $field['type'] = '';
+        if (!empty($field['placeholder'])) {
+            $idname.= ' placeholder="' . esc_attr($field['placeholder']) . '"';
         }
 
         switch ($field['type']) {
@@ -662,6 +663,7 @@ class WPUPostMetas {
             'box' => '',
             'name' => 'Field Name',
             'type' => 'text',
+            'placeholder' => '',
             'admin_column' => false,
             'datas' => array()
         );
