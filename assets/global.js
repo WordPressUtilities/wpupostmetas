@@ -136,18 +136,26 @@ var wpupostmetas_settables = function() {
 ---------------------------------------------------------- */
 
 var wpupostmetas_setattachmentrefresh = function(self) {
-    var refresh = jQuery('<span class="wpupostmetas-attachments__refresh"></span>'),
+    var refreshClass = 'wpupostmetas-attachments__refresh',
+        refresh = jQuery('<span class="' + refreshClass + '"></span>'),
         sparent = self.parent();
     sparent.append(refresh);
-    // Refresh on click
+
+    // Refresh all items on click
     refresh.on('click', function(e) {
+        jQuery('.' + refreshClass).trigger('click-refresh');
+    });
+
+    // Refresh on click
+    refresh.on('click-refresh', function(e) {
+
         /* Disable click */
         sparent.addClass('is-disabled');
         e.preventDefault();
         jQuery.post(ajaxurl, {
             action: 'wpupostmetas_attachments',
             post_id: self.attr('data-postid'),
-            post_value: self.attr('data-postvalue'),
+            post_value: self.val(),
         }, function(response) {
             self.html(response);
             /* Enable click */
