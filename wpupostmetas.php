@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.20.2
+Version: 0.21
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,12 +15,12 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.20.2';
+    public $version = '0.21';
 
     /**
      * Initialize class
      */
-    function __construct() {
+    public function __construct() {
         if (is_admin()) {
             add_action('plugins_loaded', array(&$this,
                 'load_plugin_textdomain'
@@ -48,41 +48,42 @@ class WPUPostMetas {
         }
     }
 
-    function init() {
+    public function init() {
         $this->load_fields();
         $this->set_admin_columns();
     }
 
-    function load_plugin_textdomain() {
+    public function load_plugin_textdomain() {
         load_plugin_textdomain('wpupostmetas', false, dirname(plugin_basename(__FILE__)) . '/lang/');
     }
 
-    function load_assets() {
+    public function load_assets() {
         $screen = get_current_screen();
-        wp_register_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__) , array() , $this->version);
+        wp_register_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__), array(), $this->version);
 
         // Localize the script with new data
         wp_localize_script('wpupostmetas_scripts', 'wpupostmetas_tra', array(
             'delete_line_txt' => __('Delete this line?', 'wpupostmetas')
         ));
         if ($screen->base == 'post') {
-            wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__) , array() , $this->version);
+            wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__), array(), $this->version);
             wp_enqueue_script('wpupostmetas_scripts');
         }
     }
 
-    function load_assets_qtranslatex() {
-        wp_enqueue_script('wpupostmetas_qtranslatex', plugins_url('assets/qtranslatex.js', __FILE__) , array() , $this->version);
+    public function load_assets_qtranslatex() {
+        wp_enqueue_script('wpupostmetas_qtranslatex', plugins_url('assets/qtranslatex.js', __FILE__), array(), $this->version);
     }
 
     /*
      * Admin list columns
     */
 
-    function set_admin_columns() {
+    public function set_admin_columns() {
 
         $this->admin_columns = array();
         $this->admin_columns_sortable = array();
+        $this->admin_columns_filterable = array();
         foreach ($this->boxes as $box_id => $box) {
             if (isset($box['post_type']) && is_array($box['post_type'])) {
                 foreach ($box['post_type'] as $post_type) {
@@ -94,10 +95,15 @@ class WPUPostMetas {
                         if ($field['admin_column'] !== true || $field['box'] != $box_id) {
                             continue;
                         }
-
+                        // Column
                         $this->admin_columns[$post_type][$field_id] = $field;
+                        // Sortable
                         if (isset($field['admin_column_sortable']) && $field['admin_column_sortable'] === true) {
                             $this->admin_columns_sortable['wpupostmetas_' . $field_id] = $field_id;
+                        }
+                        // Filterable
+                        if (isset($field['admin_column_filterable']) && $field['admin_column_filterable'] === true) {
+                            $this->admin_columns_filterable[$field_id] = $field_id;
                         }
                     }
                 }
@@ -110,21 +116,23 @@ class WPUPostMetas {
             }
             add_filter('manage_edit-' . $post_type . '_columns', array(&$this,
                 'set_columns_head'
-            ) , 10, 2);
+            ), 10, 2);
             add_action('manage_' . $post_type . '_posts_custom_column', array(&$this,
                 'set_columns_content'
-            ) , 10, 2);
+            ), 10, 2);
             add_filter('manage_edit-' . $post_type . '_sortable_columns', array(&$this,
                 'set_columns_sortable'
-            ) , 10, 2);
+            ), 10, 2);
             add_action('pre_get_posts', array(&$this,
                 'set_columns_sortable_orderby'
+            ));
+            add_action('pre_get_posts', array(&$this,
+                'set_columns_sortable_filterby'
             ));
         }
     }
 
-    function set_columns_sortable_orderby($query) {
-
+    public function set_columns_sortable_orderby($query) {
         $orderby = $query->get('orderby');
         foreach ($this->admin_columns_sortable as $key => $val) {
             if ($val == $orderby) {
@@ -133,8 +141,20 @@ class WPUPostMetas {
         }
     }
 
+    public function set_columns_sortable_filterby($query) {
+        if (!isset($_GET['meta_key']) || !isset($_GET['meta_value'])) {
+            return;
+        }
+        foreach ($this->admin_columns_filterable as $key => $val) {
+            if ($val == $_GET['meta_key']) {
+                $query->set('meta_key', $val);
+                $query->set('meta_value', $_GET['meta_value']);
+            }
+        }
+    }
+
     // Sort columns
-    function set_columns_sortable($columns) {
+    public function set_columns_sortable($columns) {
         foreach ($this->admin_columns_sortable as $key => $val) {
             $columns[$key] = $val;
         }
@@ -142,7 +162,7 @@ class WPUPostMetas {
     }
 
     // Display columns header
-    function set_columns_head($defaults) {
+    public function set_columns_head($defaults) {
         global $post;
         $current_post_type = get_query_var('post_type');
         foreach ($this->admin_columns as $post_type => $values) {
@@ -156,7 +176,12 @@ class WPUPostMetas {
     }
 
     // Display column content
-    function set_columns_content($column_name, $post_ID) {
+    public function set_columns_content($column_name, $post_ID) {
+        global $post;
+        $post_type = 'any';
+        if (isset($post->post_type)) {
+            $post_type = $post->post_type;
+        }
 
         // Each post type
         foreach ($this->admin_columns as $post_type => $values) {
@@ -166,17 +191,21 @@ class WPUPostMetas {
                 if ($column_name == 'wpupostmetas_' . $field_id) {
                     $value = get_post_meta($post_ID, $field_id, 1);
                     switch ($field['type']) {
-                        case 'select':
+                    case 'select':
 
-                            // If valid select, display data label
-                            if (isset($field['datas']) && array_key_exists($value, $field['datas'])) {
-                                echo $field['datas'][$value];
-                                break;
-                            }
-                        default:
+                        // If valid select, display data label
+                        if (isset($field['datas']) && array_key_exists($value, $field['datas'])) {
+                            echo $field['datas'][$value];
+                            break;
+                        }
+                    default:
 
-                            // Display raw value
-                            echo $value;
+                        if (isset($field['admin_column_filterable']) && $field['admin_column_filterable'] === true) {
+                            $value = '<a href="' . admin_url('edit.php?post_type=' . urlencode($post_type) . '&meta_key=' . urlencode($field_id) . '&meta_value=' . urlencode($value)) . '">' . $value . '</a>';
+                        }
+
+                        // Display raw value
+                        echo $value;
                     }
                 }
             }
@@ -186,7 +215,7 @@ class WPUPostMetas {
     /**
      * Adds meta boxes
      */
-    function add_custom_box() {
+    public function add_custom_box() {
         global $post;
         foreach ($this->boxes as $id => $box) {
             $box = $this->control_box_datas($box);
@@ -218,7 +247,7 @@ class WPUPostMetas {
                     add_meta_box('wputh_box_' . $id, $box['name'], array(
                         $this,
                         'box_content'
-                    ) , $type, $box['context']);
+                    ), $type, $box['context']);
                 }
             }
         }
@@ -229,7 +258,7 @@ class WPUPostMetas {
      *
      * @param unknown $post_id
      */
-    function save_postdata($post_id) {
+    public function save_postdata($post_id) {
         $languages = $this->get_languages();
 
         $boxes = $this->boxes;
@@ -239,14 +268,21 @@ class WPUPostMetas {
 
         // First we need to check if the current user is authorised to do this action.
         if ('page' == $post_type) {
-            if (!current_user_can('edit_page', $post_id)) return;
-        }
-        else {
-            if (!current_user_can('edit_post', $post_id)) return;
+            if (!current_user_can('edit_page', $post_id)) {
+                return;
+            }
+
+        } else {
+            if (!current_user_can('edit_post', $post_id)) {
+                return;
+            }
+
         }
 
         // Secondly we need to check if the user intended to change this value.
-        if (!isset($_POST['wputh_post_metas_noncename']) || !wp_verify_nonce($_POST['wputh_post_metas_noncename'], plugin_basename(__FILE__))) return;
+        if (!isset($_POST['wputh_post_metas_noncename']) || !wp_verify_nonce($_POST['wputh_post_metas_noncename'], plugin_basename(__FILE__))) {
+            return;
+        }
 
         $post_ID = $_POST['post_ID'];
 
@@ -267,8 +303,7 @@ class WPUPostMetas {
                                 update_post_meta($post_ID, $tmp_field_id, $field_value);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         $field_value = $this->check_field_value($field_id, $field);
                         if ($field_value !== false) {
                             update_post_meta($post_ID, $field_id, $field_value);
@@ -285,12 +320,12 @@ class WPUPostMetas {
      * @param unknown $post
      * @param unknown $details
      */
-    function box_content($post, $details) {
+    public function box_content($post, $details) {
         $languages = $this->get_languages();
         $fields = $this->fields;
         $boxid = str_replace('wputh_box_', '', $details['id']);
         $boxfields = $this->fields_from_box($boxid, $this->fields);
-        wp_nonce_field(plugin_basename(__FILE__) , 'wputh_post_metas_noncename');
+        wp_nonce_field(plugin_basename(__FILE__), 'wputh_post_metas_noncename');
         echo '<table class="wpupostmetas-table">';
         foreach ($fields as $id => $field) {
             if (array_key_exists($id, $boxfields)) {
@@ -315,8 +350,7 @@ class WPUPostMetas {
                     if (!$this->qtranslatex) {
                         echo '</table></div></td></tr>';
                     }
-                }
-                else {
+                } else {
                     $this->field_content($post, $id, $field);
                 }
             }
@@ -331,7 +365,7 @@ class WPUPostMetas {
      * @param unknown $id
      * @param unknown $field
      */
-    function field_content($post, $id, $field, $only_field = false, $val = false, $id_lang = false) {
+    public function field_content($post, $id, $field, $only_field = false, $val = false, $id_lang = false) {
         $value = '';
         $main_post_id = 0;
         if (is_object($post)) {
@@ -368,126 +402,126 @@ class WPUPostMetas {
         }
 
         if (!empty($field['placeholder'])) {
-            $idname.= ' placeholder="' . esc_attr($field['placeholder']) . '"';
+            $idname .= ' placeholder="' . esc_attr($field['placeholder']) . '"';
         }
 
         switch ($field['type']) {
-            case 'attachment':
-                $args = array(
-                    'post_type' => 'attachment',
-                    'posts_per_page' => - 1,
-                    'post_status' => 'any',
-                    'post_parent' => $main_post_id
-                );
-                $attachments = get_posts($args);
-                echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
-                echo '<div class="preview-img" id="preview-' . $id . '"></div>';
-                echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
-                echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
-                foreach ($attachments as $attachment) {
-                    $data_guid = '';
-                    if (strpos($attachment->post_mime_type, 'image/') !== false) {
-                        $data_guid = 'data-guid="' . $attachment->guid . '"';
-                    }
-                    echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
+        case 'attachment':
+            $args = array(
+                'post_type' => 'attachment',
+                'posts_per_page' => -1,
+                'post_status' => 'any',
+                'post_parent' => $main_post_id
+            );
+            $attachments = get_posts($args);
+            echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
+            echo '<div class="preview-img" id="preview-' . $id . '"></div>';
+            echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
+            echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
+            foreach ($attachments as $attachment) {
+                $data_guid = '';
+                if (strpos($attachment->post_mime_type, 'image/') !== false) {
+                    $data_guid = 'data-guid="' . $attachment->guid . '"';
                 }
-                echo '</select>';
-                echo '<span class="no-attachments">' . __('No attachments', 'wpupostmetas') . '</span>';
-                echo '</div>';
+                echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
+            }
+            echo '</select>';
+            echo '<span class="no-attachments">' . __('No attachments', 'wpupostmetas') . '</span>';
+            echo '</div>';
             break;
-            case 'select':
+        case 'select':
+            echo '<select ' . $idname . '>';
+            echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
+            foreach ($field_datas as $key => $var) {
+                echo '<option value="' . $key . '" ' . ((string) $key === (string) $value ? 'selected="selected"' : '') . '>' . $var . '</option>';
+            }
+            echo '</select>';
+            break;
+        case 'radio':
+            foreach ($field_datas as $key => $var) {
+                $item_id = 'radio_' . $id . '_' . $key;
+                echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string) $key === (string) $value ? 'checked="checked"' : '') . ' />';
+                echo '<label for="' . $item_id . '">' . $var . '</label>';
+            }
+            break;
+        case 'page':
+            wp_dropdown_pages(array(
+                'name' => $id,
+                'selected' => $value,
+                'show_option_none' => __('None', 'wpupostmetas')
+            ));
+            break;
+        case 'post':
+            $wpq_post_type_field = new WP_Query(array(
+                'posts_per_page' => -1,
+                'no_found_rows' => true,
+                'update_post_term_cache' => false,
+                'update_post_meta_cache' => false,
+                'post_type' => $field['post_type']
+            ));
+            if ($wpq_post_type_field->have_posts()) {
                 echo '<select ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
-                foreach ($field_datas as $key => $var) {
-                    echo '<option value="' . $key . '" ' . ((string)$key === (string)$value ? 'selected="selected"' : '') . '>' . $var . '</option>';
+                echo '<option value="">' . __('None', 'wpupostmetas') . '</option>';
+                while ($wpq_post_type_field->have_posts()) {
+                    $wpq_post_type_field->the_post();
+                    $post_id = get_the_ID();
+                    echo '<option value="' . $post_id . '" ' . ((string) $post_id === (string) $value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
                 }
                 echo '</select>';
+            }
+            wp_reset_postdata();
             break;
-            case 'radio':
-                foreach ($field_datas as $key => $var) {
-                    $item_id = 'radio_' . $id . '_' . $key;
-                    echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string)$key === (string)$value ? 'checked="checked"' : '') . ' />';
-                    echo '<label for="' . $item_id . '">' . $var . '</label>';
-                }
+        case 'textarea':
+        case 'htmlcontent':
+            echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
             break;
-            case 'page':
-                wp_dropdown_pages(array(
-                    'name' => $id,
-                    'selected' => $value,
-                    'show_option_none' => __('None', 'wpupostmetas')
-                ));
+        case 'editor':
+            wp_editor($value, $id, array(
+                'textarea_rows' => 3
+            ));
             break;
-            case 'post':
-                $wpq_post_type_field = new WP_Query(array(
-                    'posts_per_page' => - 1,
-                    'no_found_rows' => true,
-                    'update_post_term_cache' => false,
-                    'update_post_meta_cache' => false,
-                    'post_type' => $field['post_type']
-                ));
-                if ($wpq_post_type_field->have_posts()) {
-                    echo '<select ' . $idname . '>';
-                    echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
-                    echo '<option value="">' . __('None', 'wpupostmetas') . '</option>';
-                    while ($wpq_post_type_field->have_posts()) {
-                        $wpq_post_type_field->the_post();
-                        $post_id = get_the_ID();
-                        echo '<option value="' . $post_id . '" ' . ((string)$post_id === (string)$value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
-                    }
-                    echo '</select>';
-                }
-                wp_reset_postdata();
-            break;
-            case 'textarea':
-            case 'htmlcontent':
-                echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
-            break;
-            case 'editor':
-                wp_editor($value, $id, array(
-                    'textarea_rows' => 3
-                ));
-            break;
-            case 'table':
+        case 'table':
 
-                $table_columns = $field['columns'];
-                $table_width = count($table_columns);
-                $table_basename = $id . '__';
-                $table_maxline = isset($field['table_maxline']) && is_numeric($field['table_maxline']) ? $field['table_maxline'] : 10;
-                $values = json_decode($value, true);
+            $table_columns = $field['columns'];
+            $table_width = count($table_columns);
+            $table_basename = $id . '__';
+            $table_maxline = isset($field['table_maxline']) && is_numeric($field['table_maxline']) ? $field['table_maxline'] : 10;
+            $values = json_decode($value, true);
 
-                echo '<div class="wpupostmetas-table-post-wrap">';
-                echo '<table data-table-basename="' . $table_basename . '" data-table-maxline="' . $table_maxline . '" class="wpupostmetas-table-post">';
-                echo '<thead><tr>';
-                foreach ($table_columns as $col_id => $col) {
-                    echo '<th>' . (isset($col['name']) ? $col['name'] : ucfirst($col_id)) . '</th>';
-                }
-                echo '</tr></thead>';
-                echo '<tfoot><tr><td colspan="99">';
-                echo '<button type="button" class="button-secondary plus" title="' . __('Add a new line', 'wpupostmetas') . '"><span class="dashicons dashicons-welcome-add-page"></span> ' . __('Add a new line', 'wpupostmetas') . '</button> ';
-                echo '<button type="button" class="button-secondary copy" title="' . __('Copy last line', 'wpupostmetas') . '"><span class="dashicons dashicons-admin-appearance"></span> ' . __('Copy last line', 'wpupostmetas') . '</button>';
-                echo '</td></tr></tfoot>';
-                echo '<tbody>';
+            echo '<div class="wpupostmetas-table-post-wrap">';
+            echo '<table data-table-basename="' . $table_basename . '" data-table-maxline="' . $table_maxline . '" class="wpupostmetas-table-post">';
+            echo '<thead><tr>';
+            foreach ($table_columns as $col_id => $col) {
+                echo '<th>' . (isset($col['name']) ? $col['name'] : ucfirst($col_id)) . '</th>';
+            }
+            echo '</tr></thead>';
+            echo '<tfoot><tr><td colspan="99">';
+            echo '<button type="button" class="button-secondary plus" title="' . __('Add a new line', 'wpupostmetas') . '"><span class="dashicons dashicons-welcome-add-page"></span> ' . __('Add a new line', 'wpupostmetas') . '</button> ';
+            echo '<button type="button" class="button-secondary copy" title="' . __('Copy last line', 'wpupostmetas') . '"><span class="dashicons dashicons-admin-appearance"></span> ' . __('Copy last line', 'wpupostmetas') . '</button>';
+            echo '</td></tr></tfoot>';
+            echo '<tbody>';
 
-                echo $this->field_content_table_line($id, $table_columns, $values);
+            echo $this->field_content_table_line($id, $table_columns, $values);
 
-                echo '</tbody>';
-                echo '</table>';
-                echo '<input type="hidden" ' . $idname . ' value="" />';
-                echo '<textarea class="template">';
-                echo htmlentities($this->field_content_table_line($id, $table_columns));
+            echo '</tbody>';
+            echo '</table>';
+            echo '<input type="hidden" ' . $idname . ' value="" />';
+            echo '<textarea class="template">';
+            echo htmlentities($this->field_content_table_line($id, $table_columns));
 
-                echo '</textarea>';
-                echo '</div>';
+            echo '</textarea>';
+            echo '</div>';
             break;
-            case 'color':
-            case 'date':
-            case 'email':
-            case 'number':
-            case 'url':
-                echo '<input type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
+        case 'color':
+        case 'date':
+        case 'email':
+        case 'number':
+        case 'url':
+            echo '<input type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
             break;
-            default:
-                echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
+        default:
+            echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
         }
         if (isset($field['help'])) {
             echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
@@ -501,7 +535,7 @@ class WPUPostMetas {
         }
     }
 
-    function field_content_table_line($id, $table_columns, $values = false) {
+    public function field_content_table_line($id, $table_columns, $values = false) {
 
         $demo_line = ($values == false);
         $return_html = '';
@@ -525,22 +559,22 @@ class WPUPostMetas {
                 if (!empty($value)) {
                     $has_filled_value = true;
                 }
-                $return_html_line.= '<td>';
+                $return_html_line .= '<td>';
                 ob_start();
                 $this->field_content(false, $table_basename . $col_id, $col_value, true, $value);
-                $return_html_line.= ob_get_clean();
-                $return_html_line.= '</td>';
+                $return_html_line .= ob_get_clean();
+                $return_html_line .= '</td>';
             }
-            $return_html_line.= $table_toolbox . '</tr>';
+            $return_html_line .= $table_toolbox . '</tr>';
             if ($has_filled_value || $demo_line) {
-                $return_html.= $return_html_line;
+                $return_html .= $return_html_line;
             }
         }
 
         return $return_html;
     }
 
-    function list_attachments_options() {
+    public function list_attachments_options() {
         global $wpdb;
 
         if (!isset($_POST['post_id'], $_POST['post_value']) || !is_numeric($_POST['post_id'])) {
@@ -548,7 +582,7 @@ class WPUPostMetas {
         }
         $args = array(
             'post_type' => 'attachment',
-            'posts_per_page' => - 1,
+            'posts_per_page' => -1,
             'post_status' => 'any',
             'post_parent' => $_POST['post_id']
         );
@@ -576,7 +610,7 @@ class WPUPostMetas {
      * @param unknown $field
      * @return unknown
      */
-    function check_field_value($id, $field) {
+    public function check_field_value($id, $field) {
 
         if (!isset($_POST[$id])) {
             return false;
@@ -585,40 +619,40 @@ class WPUPostMetas {
         $return = false;
         $value = trim($_POST[$id]);
         switch ($field['type']) {
-            case 'attachment':
-                $return = ctype_digit($value) ? $value : false;
+        case 'attachment':
+            $return = ctype_digit($value) ? $value : false;
             break;
-            case 'email':
-                $return = (filter_var($value, FILTER_VALIDATE_EMAIL) !== false || empty($value)) ? $value : false;
+        case 'email':
+            $return = (filter_var($value, FILTER_VALIDATE_EMAIL) !== false || empty($value)) ? $value : false;
             break;
-            case 'radio':
-            case 'select':
-                $return = array_key_exists($value, $field['datas']) ? $value : false;
+        case 'radio':
+        case 'select':
+            $return = array_key_exists($value, $field['datas']) ? $value : false;
             break;
-            case 'textarea':
-                $return = strip_tags($value);
+        case 'textarea':
+            $return = strip_tags($value);
             break;
-            case 'htmlcontent':
-                $return = $value;
+        case 'htmlcontent':
+            $return = $value;
             break;
-            case 'editor':
-                $return = $value;
+        case 'editor':
+            $return = $value;
             break;
-            case 'table':
-                $return = $value;
-                if (!is_array(json_decode(stripslashes($value) , true))) {
-                    $return = array();
-                }
+        case 'table':
+            $return = $value;
+            if (!is_array(json_decode(stripslashes($value), true))) {
+                $return = array();
+            }
             break;
-            case 'post':
-            case 'page':
-                $return = (is_numeric($value) || empty($value)) ? $value : false;
+        case 'post':
+        case 'page':
+            $return = (is_numeric($value) || empty($value)) ? $value : false;
             break;
-            case 'url':
-                $return = (filter_var($value, FILTER_VALIDATE_URL) !== false || empty($value)) ? $value : false;
+        case 'url':
+            $return = (filter_var($value, FILTER_VALIDATE_URL) !== false || empty($value)) ? $value : false;
             break;
-            default:
-                $return = sanitize_text_field($value);
+        default:
+            $return = sanitize_text_field($value);
         }
 
         return $return;
@@ -630,7 +664,7 @@ class WPUPostMetas {
      * @param unknown $box
      * @return unknown
      */
-    function control_box_datas($box) {
+    public function control_box_datas($box) {
         $default_box = array(
             'name' => 'Box',
             'capability' => 'delete_others_posts',
@@ -658,7 +692,7 @@ class WPUPostMetas {
      * @param unknown $fields
      * @return unknown
      */
-    function control_fields_settings($fields) {
+    public function control_fields_settings($fields) {
         $default_field = array(
             'box' => '',
             'name' => 'Field Name',
@@ -676,7 +710,7 @@ class WPUPostMetas {
             // Default datas to 0/1
             if (empty($new_fields[$id]['datas'])) {
                 $new_fields[$id]['datas'] = array(
-                    0 => __('No', 'wpupostmetas') ,
+                    0 => __('No', 'wpupostmetas'),
                     1 => __('Yes', 'wpupostmetas')
                 );
             }
@@ -697,7 +731,7 @@ class WPUPostMetas {
      * @param unknown $fields
      * @return unknown
      */
-    function fields_from_box($box_id, $fields) {
+    public function fields_from_box($box_id, $fields) {
         $boxfields = array();
         foreach ($fields as $id => $field) {
             if (!isset($field['box'])) {
@@ -718,7 +752,7 @@ class WPUPostMetas {
     /**
      * Load fields values
      */
-    function load_fields() {
+    public function load_fields() {
 
         // Load items
         if (empty($this->boxes)) {
