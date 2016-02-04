@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.21
+Version: 0.21.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.21';
+    public $version = '0.21.1';
 
     /**
      * Initialize class
@@ -399,6 +399,18 @@ class WPUPostMetas {
             if ($id_lang !== false) {
                 echo '<div class="qtranxs-translatable">';
             }
+        }
+
+        $field_datas = array(
+            'Yes',
+            'No'
+        );
+        if (isset($field['datas'])) {
+            $field_datas = $field['datas'];
+        }
+
+        if (!isset($field['type'])) {
+            $field['type'] = '';
         }
 
         if (!empty($field['placeholder'])) {
