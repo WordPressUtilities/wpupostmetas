@@ -15,11 +15,26 @@
 }
 
 .wpupostmetas-table th {
-    width: 150px;
+    width: 160px;
     text-align: left;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
+}
+
+.wpupostmetas-table th + td {
+    padding-bottom: 8px;
+}
+
+@media(max-width:400px) {
+    .wpupostmetas-table,
+    .wpupostmetas-table > tbody,
+    .wpupostmetas-table > tbody > tr,
+    .wpupostmetas-table > tbody > tr > th,
+    .wpupostmetas-table > tbody > tr > td {
+        display: block;
+        width: auto;
+    }
 }
 
 /* Side
@@ -68,8 +83,20 @@
     margin-left: 20px;
 }
 
-.wpupostmetas-table input,
-.wpupostmetas-table textarea {
+.wpupostmetas-table textarea,
+.wpupostmetas-table input[type="password"],
+.wpupostmetas-table input[type="color"],
+.wpupostmetas-table input[type="date"],
+.wpupostmetas-table input[type="datetime"],
+.wpupostmetas-table input[type="email"],
+.wpupostmetas-table input[type="number"],
+.wpupostmetas-table input[type="tel"],
+.wpupostmetas-table input[type="text"],
+.wpupostmetas-table input[type="time"],
+.wpupostmetas-table input[type="url"] {
+    display: block;
+    width: 100%;
+    margin: 0;
     max-width: 100%;
 }
 

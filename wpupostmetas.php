@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.21.1
+Version: 0.22
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,37 +15,38 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.21.1';
+    public $version = '0.22';
 
     /**
      * Initialize class
      */
     public function __construct() {
-        if (is_admin()) {
-            add_action('plugins_loaded', array(&$this,
-                'load_plugin_textdomain'
-            ));
-            add_action('add_meta_boxes', array(
-                $this,
-                'add_custom_box'
-            ));
-            add_action('save_post', array(
-                $this,
-                'save_postdata'
-            ));
-            add_action('admin_enqueue_scripts', array(&$this,
-                'load_assets'
-            ));
-            add_action('qtranslate_add_admin_footer_js', array(&$this,
-                'load_assets_qtranslatex'
-            ));
-            add_action('wp_ajax_wpupostmetas_attachments', array(&$this,
-                'list_attachments_options'
-            ));
-            add_action('init', array(&$this,
-                'init'
-            ));
+        if (!is_admin()) {
+            return;
         }
+        add_action('plugins_loaded', array(&$this,
+            'load_plugin_textdomain'
+        ));
+        add_action('add_meta_boxes', array(
+            $this,
+            'add_custom_box'
+        ));
+        add_action('save_post', array(
+            $this,
+            'save_postdata'
+        ));
+        add_action('admin_enqueue_scripts', array(&$this,
+            'load_assets'
+        ));
+        add_action('qtranslate_add_admin_footer_js', array(&$this,
+            'load_assets_qtranslatex'
+        ));
+        add_action('wp_ajax_wpupostmetas_attachments', array(&$this,
+            'list_attachments_options'
+        ));
+        add_action('init', array(&$this,
+            'init'
+        ));
     }
 
     public function init() {
@@ -59,19 +60,24 @@ class WPUPostMetas {
 
     public function load_assets() {
         $screen = get_current_screen();
+        if ($screen->base != 'post') {
+            return;
+        }
         wp_register_script('wpupostmetas_scripts', plugins_url('assets/global.js', __FILE__), array(), $this->version);
 
         // Localize the script with new data
         wp_localize_script('wpupostmetas_scripts', 'wpupostmetas_tra', array(
             'delete_line_txt' => __('Delete this line?', 'wpupostmetas')
         ));
-        if ($screen->base == 'post') {
-            wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__), array(), $this->version);
-            wp_enqueue_script('wpupostmetas_scripts');
-        }
+        wp_enqueue_style('wpupostmetas_style', plugins_url('assets/style.css', __FILE__), array(), $this->version);
+        wp_enqueue_script('wpupostmetas_scripts');
     }
 
     public function load_assets_qtranslatex() {
+        $screen = get_current_screen();
+        if ($screen->base != 'post') {
+            return;
+        }
         wp_enqueue_script('wpupostmetas_qtranslatex', plugins_url('assets/qtranslatex.js', __FILE__), array(), $this->version);
     }
 
