@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.22
+Version: 0.23
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,7 +15,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.22';
+    public $version = '0.23';
 
     /**
      * Initialize class
@@ -395,6 +395,9 @@ class WPUPostMetas {
         if ($val !== false) {
             $value = $val;
         }
+
+        $orderby = isset($field['orderby']) ? $field['orderby'] : 'name';
+        $order = isset($field['order']) ? $field['order'] : 'ASC';
         $el_id = 'el_id_' . $id;
         $idname = 'name="' . $id . '"';
         if ($only_field === false) {
@@ -429,7 +432,9 @@ class WPUPostMetas {
                 'post_type' => 'attachment',
                 'posts_per_page' => -1,
                 'post_status' => 'any',
-                'post_parent' => $main_post_id
+                'post_parent' => $main_post_id,
+                'orderby' => $orderby,
+                'order' => $order,
             );
             $attachments = get_posts($args);
             echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
@@ -475,7 +480,9 @@ class WPUPostMetas {
                 'no_found_rows' => true,
                 'update_post_term_cache' => false,
                 'update_post_meta_cache' => false,
-                'post_type' => $field['post_type']
+                'post_type' => $field['post_type'],
+                'orderby' => $orderby,
+                'order' => $order,
             ));
             if ($wpq_post_type_field->have_posts()) {
                 echo '<select ' . $idname . '>';
