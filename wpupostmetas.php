@@ -4,18 +4,20 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.23
+Version: 0.23.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
 License URI: http://opensource.org/licenses/MIT
 */
 
+defined('ABSPATH') or die(':(');
+
 class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.23';
+    public $version = '0.23.1';
 
     /**
      * Initialize class
@@ -434,7 +436,7 @@ class WPUPostMetas {
                 'post_status' => 'any',
                 'post_parent' => $main_post_id,
                 'orderby' => $orderby,
-                'order' => $order,
+                'order' => $order
             );
             $attachments = get_posts($args);
             echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
@@ -482,7 +484,7 @@ class WPUPostMetas {
                 'update_post_meta_cache' => false,
                 'post_type' => $field['post_type'],
                 'orderby' => $orderby,
-                'order' => $order,
+                'order' => $order
             ));
             if ($wpq_post_type_field->have_posts()) {
                 echo '<select ' . $idname . '>';
