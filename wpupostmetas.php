@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.24
+Version: 0.25
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.24';
+    public $version = '0.25';
 
     /**
      * Initialize class
@@ -481,6 +481,10 @@ class WPUPostMetas {
                 echo '<label for="' . $item_id . '">' . $var . '</label>';
             }
             break;
+        case 'checkbox':
+            echo '<label><input type="checkbox" ' . $idname . ' ' . checked($value, '1', 0) . ' value="1" /> ' . (isset($field['name']) ? $field['name'] : '') . '</label>';
+            echo '<input type="hidden" name="' . $id . '__check" value="1" />';
+            break;
         case 'page':
             wp_dropdown_pages(array(
                 'name' => $id,
@@ -650,9 +654,12 @@ class WPUPostMetas {
      * @return unknown
      */
     public function check_field_value($id, $field) {
-
-        if (!isset($_POST[$id])) {
+        if (!isset($_POST[$id]) && $field['type'] != 'checkbox') {
             return false;
+        }
+
+        if ($field['type'] == 'checkbox' && isset($_POST[$id . '__check'])) {
+            return isset($_POST[$id]) ? '1' : '0';
         }
 
         $return = false;
