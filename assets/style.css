@@ -247,3 +247,18 @@
 .wpupostmetas-table--multilingual > tbody > tr:not(.is-visible) {
     display: none;
 }
+
+/* ----------------------------------------------------------
+  Field image
+---------------------------------------------------------- */
+
+.wpupostmetas-field-image {
+    line-height: 27px;
+}
+
+.wpupostmetas-field-image img {
+    width: 27px;
+    height: 27px;
+    vertical-align: middle;
+    object-fit: cover;
+}

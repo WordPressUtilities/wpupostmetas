@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.25
+Version: 0.26
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.25';
+    public $version = '0.26';
 
     /**
      * Initialize class
@@ -465,6 +465,23 @@ class WPUPostMetas {
             echo '</select>';
             echo '<span class="no-attachments">' . __('No attachments', 'wpupostmetas') . '</span>';
             echo '</div>';
+            break;
+        case 'image':
+
+            $img_url = 'http://placehold.it/150x150';
+            if (is_numeric($value)) {
+                $img_url_tmp = wp_get_attachment_image_src($value);
+                if (is_array($img_url_tmp)) {
+                    $img_url = $img_url_tmp[0];
+                }
+            }
+
+            echo '<div class="wpupostmetas-field-image">';
+            echo '<img src="' . $img_url . '" alt="" /> ';
+            echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-altlabel="' . esc_attr(__('Change image', 'wpupostmetas')) . '" type="button">' . __('Change image', 'wpupostmetas') . '</button>';
+            echo '<input type="hidden" id="' . $item_id . '" name="' . $id . '" value="' . esc_attr($value) . '" />';
+            echo '</div>';
+
             break;
         case 'select':
             echo '<select ' . $idname . '>';
