@@ -197,12 +197,12 @@ var wpupostmetas_setattachmentpreview = function(self) {
 ---------------------------------------------------------- */
 
 function wpupostmetas_setimages() {
-    /* Add an image */
-    jQuery('.wpupostmetas-field-image').click(function(e) {
+    jQuery('.wpupostmetas-field-image').each(function(e) {
         var $this = jQuery(this),
-            $parent = $this.parent(),
-            $imgPreview = $parent.find('img'),
-            $imgField = $parent.find('input[type="hidden"]');
+            $imgPreview = $this.find('img'),
+            $imgRemove = $this.find('.wpupostmetas-field-image__remove a'),
+            $imgButton = $this.find('button'),
+            $imgField = $this.find('input[type="hidden"]');
 
         var frame = wp.media({
             multiple: false,
@@ -222,16 +222,32 @@ function wpupostmetas_setimages() {
         frame.on('select', function() {
             var attachment = frame.state().get('selection').first().toJSON();
             $imgPreview.attr('src', attachment.url);
-            $this.attr('data-attid', attachment.id);
+            $imgButton.attr('data-attid', attachment.id);
             // Send the attachment id to our hidden input
             $imgField.val(attachment.id);
-            $this.text($this.attr('data-altlabel'));
+            $imgButton.text($imgButton.attr('data-changelabel'));
+            $this.addClass('wpupostmetas-field-image--hasimage');
         });
 
-        // Finally, open the modal on click
-        frame.open();
+        /* Add an image */
+        $imgButton.on('click', function(e) {
+            e.preventDefault();
+            frame.open();
+        });
+        $imgPreview.on('click', function(e) {
+            e.preventDefault();
+            frame.open();
+        });
 
-        e.preventDefault();
+        /* Remove an image */
+        $imgRemove.on('click', function(e) {
+            e.preventDefault();
+            $imgField.val('');
+            $imgButton.attr('data-attid', '');
+            $imgPreview.attr('src', '');
+            $imgButton.text($imgButton.attr('data-addlabel'));
+            $this.removeClass('wpupostmetas-field-image--hasimage');
+        })
     });
 
 }

@@ -260,5 +260,15 @@
     width: 27px;
     height: 27px;
     vertical-align: middle;
+    cursor: pointer;
     object-fit: cover;
+}
+
+.wpupostmetas-field-image__remove,
+.wpupostmetas-field-image img[src=""] {
+    display: none;
+}
+
+.wpupostmetas-field-image--hasimage .wpupostmetas-field-image__remove {
+    display: block;
 }

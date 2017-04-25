@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.26
+Version: 0.26.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.26';
+    public $version = '0.26.1';
 
     /**
      * Initialize class
@@ -468,7 +468,7 @@ class WPUPostMetas {
             break;
         case 'image':
 
-            $img_url = 'http://placehold.it/150x150';
+            $img_url = '';
             if (is_numeric($value)) {
                 $img_url_tmp = wp_get_attachment_image_src($value);
                 if (is_array($img_url_tmp)) {
@@ -476,10 +476,13 @@ class WPUPostMetas {
                 }
             }
 
-            echo '<div class="wpupostmetas-field-image">';
-            echo '<img src="' . $img_url . '" alt="" /> ';
-            echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-altlabel="' . esc_attr(__('Change image', 'wpupostmetas')) . '" type="button">' . __('Change image', 'wpupostmetas') . '</button>';
+            $label = !empty($img_url) ? __('Change image', 'wpupostmetas') : __('Choose an image', 'wpupostmetas');
+
+            echo '<div class="wpupostmetas-field-image ' . (!empty($img_url) ? 'wpupostmetas-field-image--hasimage' : '') . '">';
+            echo '<img src="' . $img_url . '"  alt="" /> ';
+            echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-addlabel="' . esc_attr(__('Choose an image', 'wpupostmetas')) . '" data-changelabel="' . esc_attr(__('Change image', 'wpupostmetas')) . '" type="button">' . $label . '</button>';
             echo '<input type="hidden" id="' . $item_id . '" name="' . $id . '" value="' . esc_attr($value) . '" />';
+            echo '<div class="wpupostmetas-field-image__remove"><small><a href="#">' . __('Remove image', 'wpupostmetas') . '</a></small></div>';
             echo '</div>';
 
             break;
