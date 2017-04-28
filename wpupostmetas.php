@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.26.2
+Version: 0.27
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.26.2';
+    public $version = '0.27';
 
     /**
      * Initialize class
@@ -442,47 +442,36 @@ class WPUPostMetas {
 
         switch ($field['type']) {
         case 'attachment':
-            $args = array(
-                'post_type' => 'attachment',
-                'posts_per_page' => -1,
-                'post_status' => 'any',
-                'post_parent' => $main_post_id,
-                'orderby' => $orderby,
-                'order' => $order
-            );
-            $attachments = get_posts($args);
-            echo '<div class="wpupostmetas-attachments__container" data-attachment-count="' . count($attachments) . '"><span class="before"></span>';
-            echo '<div class="preview-img" id="preview-' . $id . '"></div>';
-            echo '<select ' . $idname . ' class="wpupostmetas-attachments" data-postid="' . $main_post_id . '" data-postvalue="' . $value . '">';
-            echo '<option value="-">' . __('None', 'wpupostmetas') . '</option>';
-            foreach ($attachments as $attachment) {
-                $data_guid = '';
-                if (strpos($attachment->post_mime_type, 'image/') !== false) {
-                    $data_guid = 'data-guid="' . $attachment->guid . '"';
-                }
-                echo '<option ' . $data_guid . ' value="' . $attachment->ID . '" ' . ($attachment->ID == $value ? 'selected="selected"' : '') . '>' . apply_filters('the_title', $attachment->post_title) . '</option>';
-            }
-            echo '</select>';
-            echo '<span class="no-attachments">' . __('No attachments', 'wpupostmetas') . '</span>';
-            echo '</div>';
-            break;
         case 'image':
 
             $img_url = '';
+            $file_name = '';
             if (is_numeric($value)) {
                 $img_url_tmp = wp_get_attachment_image_src($value);
                 if (is_array($img_url_tmp)) {
                     $img_url = $img_url_tmp[0];
+                } else {
+                    $file_name = basename(get_attached_file($value));
                 }
             }
 
-            $label = !empty($img_url) ? __('Change image', 'wpupostmetas') : __('Choose an image', 'wpupostmetas');
+            $label_delete = __('Remove image', 'wpupostmetas');
+            $label_choose = __('Choose an image', 'wpupostmetas');
+            $label_change = __('Change image', 'wpupostmetas');
+            if ($field['type'] == 'attachment') {
+                $label_delete = __('Remove file', 'wpupostmetas');
+                $label_choose = __('Choose a file', 'wpupostmetas');
+                $label_change = __('Change file', 'wpupostmetas');
+            }
 
-            echo '<div class="wpupostmetas-field-image ' . (!empty($img_url) ? 'wpupostmetas-field-image--hasimage' : '') . '">';
+            $label = (!empty($img_url) || !empty($file_name)) ? $label_change : $label_choose;
+
+            echo '<div data-type="' . $field['type'] . '" class="wpupostmetas-field-image ' . (!empty($img_url) ? 'wpupostmetas-field-image--hasimage' : '') . ' ' . (!empty($file_name) ? 'wpupostmetas-field-image--hasfile' : '') . '">';
+            echo '<div class="wpupostmetas-field-file__name">' . $file_name . '</small></div>';
             echo '<img src="' . $img_url . '"  alt="" /> ';
-            echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-addlabel="' . esc_attr(__('Choose an image', 'wpupostmetas')) . '" data-changelabel="' . esc_attr(__('Change image', 'wpupostmetas')) . '" type="button">' . $label . '</button>';
+            echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-addlabel="' . esc_attr($label_choose) . '" data-changelabel="' . esc_attr($label_change) . '" type="button">' . $label . '</button>';
             echo '<input type="hidden" name="' . $id . '" value="' . esc_attr($value) . '" />';
-            echo '<div class="wpupostmetas-field-image__remove"><small><a href="#">' . __('Remove image', 'wpupostmetas') . '</a></small></div>';
+            echo '<div class="wpupostmetas-field-image__remove"><small><a href="#">' . $label_delete . '</a></small></div>';
             echo '</div>';
 
             break;

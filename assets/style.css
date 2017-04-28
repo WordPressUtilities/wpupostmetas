@@ -269,6 +269,7 @@
     display: none;
 }
 
+.wpupostmetas-field-image--hasfile .wpupostmetas-field-image__remove,
 .wpupostmetas-field-image--hasimage .wpupostmetas-field-image__remove {
     display: block;
 }

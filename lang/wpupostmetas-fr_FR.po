@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Post Metas\n"
-"POT-Creation-Date: 2017-04-25 23:11+0200\n"
+"POT-Creation-Date: 2017-04-28 23:57+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -19,46 +19,57 @@ msgstr ""
 msgid "Delete this line?"
 msgstr "Supprimer cette ligne ?"
 
-#: .././wpupostmetas.php:457 .././wpupostmetas.php:512
-#: .././wpupostmetas.php:528 .././wpupostmetas.php:653
-msgid "None"
-msgstr "Aucun"
+#: .././wpupostmetas.php:458
+msgid "Remove image"
+msgstr "Retirer l’image"
 
-#: .././wpupostmetas.php:466
-msgid "No attachments"
-msgstr "Aucune pièce jointe"
-
-#: .././wpupostmetas.php:479 .././wpupostmetas.php:483
-msgid "Change image"
-msgstr "Changer l’image"
-
-#: .././wpupostmetas.php:479 .././wpupostmetas.php:483
+#: .././wpupostmetas.php:459
 msgid "Choose an image"
 msgstr "Choisir une image"
 
-#: .././wpupostmetas.php:485
-msgid "Remove image"
-msgstr "Enlever l’image"
+#: .././wpupostmetas.php:460
+msgid "Change image"
+msgstr "Changer l’image"
 
-#: .././wpupostmetas.php:491 .././wpupostmetas.php:527
+#: .././wpupostmetas.php:462
+msgid "Remove file"
+msgstr "Retirer le fichier"
+
+#: .././wpupostmetas.php:463
+msgid "Choose a file"
+msgstr "Choisir un fichier"
+
+#: .././wpupostmetas.php:464
+msgid "Change file"
+msgstr "Changer de fichier"
+
+#: .././wpupostmetas.php:480 .././wpupostmetas.php:516
 msgid "Select a value"
 msgstr "Sélectionnez une valeur"
 
-#: .././wpupostmetas.php:563
+#: .././wpupostmetas.php:501 .././wpupostmetas.php:517
+#: .././wpupostmetas.php:642
+msgid "None"
+msgstr "Aucun"
+
+#: .././wpupostmetas.php:552
 msgid "Add a new line"
 msgstr "Nouvelle ligne"
 
-#: .././wpupostmetas.php:564
+#: .././wpupostmetas.php:553
 msgid "Copy last line"
 msgstr "Copier la dernière ligne"
 
-#: .././wpupostmetas.php:779
+#: .././wpupostmetas.php:768
 msgid "No"
 msgstr "Non"
 
-#: .././wpupostmetas.php:780
+#: .././wpupostmetas.php:769
 msgid "Yes"
 msgstr "Oui"
+
+#~ msgid "No attachments"
+#~ msgstr "Aucune pièce jointe"
 
 #~ msgid "Delete this line ?"
 #~ msgstr "Supprimer cette ligne ?"

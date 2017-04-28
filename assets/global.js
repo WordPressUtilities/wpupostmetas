@@ -199,14 +199,23 @@ var wpupostmetas_setattachmentpreview = function(self) {
 function wpupostmetas_setimages() {
     jQuery('.wpupostmetas-field-image').each(function(e) {
         var $this = jQuery(this),
+            mediatype = $this.attr('data-type'),
+            $txtPreview = $this.find('.wpupostmetas-field-file__name'),
             $imgPreview = $this.find('img'),
             $imgRemove = $this.find('.wpupostmetas-field-image__remove a'),
             $imgButton = $this.find('button'),
             $imgField = $this.find('input[type="hidden"]');
 
-        var frame = wp.media({
+        var wpmediaobj = {
             multiple: false,
-        });
+        };
+        if (mediatype == 'image') {
+            wpmediaobj.library = {
+                type: 'image'
+            };
+        }
+
+        var frame = wp.media(wpmediaobj);
 
         // Open on selected image
         frame.on('open', function() {
@@ -221,12 +230,18 @@ function wpupostmetas_setimages() {
         // When an image is selected in the media frame...
         frame.on('select', function() {
             var attachment = frame.state().get('selection').first().toJSON();
-            $imgPreview.attr('src', attachment.url);
+            if (attachment.type == 'image') {
+                $imgPreview.attr('src', attachment.url);
+                $this.addClass('wpupostmetas-field-image--hasimage');
+            }
+            else {
+                $txtPreview.html(attachment.filename);
+                $this.addClass('wpupostmetas-field-image--hasfile');
+            }
             $imgButton.attr('data-attid', attachment.id);
             // Send the attachment id to our hidden input
             $imgField.val(attachment.id);
             $imgButton.text($imgButton.attr('data-changelabel'));
-            $this.addClass('wpupostmetas-field-image--hasimage');
         });
 
         /* Add an image */
@@ -244,9 +259,11 @@ function wpupostmetas_setimages() {
             e.preventDefault();
             $imgField.val('');
             $imgButton.attr('data-attid', '');
+            $txtPreview.html('');
             $imgPreview.attr('src', '');
             $imgButton.text($imgButton.attr('data-addlabel'));
             $this.removeClass('wpupostmetas-field-image--hasimage');
+            $this.removeClass('wpupostmetas-field-image--hasfile');
         })
     });
 
