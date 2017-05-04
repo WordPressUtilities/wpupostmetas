@@ -19,6 +19,10 @@ jQuery(document).ready(function() {
             qTranslateConfig.qtx.removeContentHook(this);
         });
     }
+
+    jQuery('.wpupostmetas-table input[type="color"]').each(function(){
+        jQuery(this).attr('type','text').wpColorPicker();
+    })
 });
 
 /* ----------------------------------------------------------
