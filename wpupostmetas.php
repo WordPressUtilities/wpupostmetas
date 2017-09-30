@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.28
+Version: 0.28.1
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.28';
+    public $version = '0.28.1';
 
     /**
      * Initialize class
@@ -493,7 +493,7 @@ class WPUPostMetas {
             }
             break;
         case 'checkbox':
-            echo '<label><input type="checkbox" ' . $idname . ' ' . checked($value, '1', 0) . ' value="1" /> ' . (isset($field['name']) ? $field['name'] : '') . '</label>';
+            echo '<label><input type="checkbox" ' . $idname . ' ' . checked($value, '1', 0) . ' value="1" /> ' . (isset($field['checkbox_label']) ? $field['checkbox_label'] : $field['name']) . '</label>';
             echo '<input type="hidden" name="' . $id . '__check" value="1" />';
             break;
         case 'page':
@@ -504,7 +504,7 @@ class WPUPostMetas {
             ));
             break;
         case 'post':
-            $wpq_post_type_field = new WP_Query(array(
+            $posts = get_posts(array(
                 'posts_per_page' => -1,
                 'no_found_rows' => true,
                 'update_post_term_cache' => false,
@@ -513,18 +513,16 @@ class WPUPostMetas {
                 'orderby' => $orderby,
                 'order' => $order
             ));
-            if ($wpq_post_type_field->have_posts()) {
+            if (!empty($posts)) {
                 echo '<select ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
                 echo '<option value="">' . __('None', 'wpupostmetas') . '</option>';
-                while ($wpq_post_type_field->have_posts()) {
-                    $wpq_post_type_field->the_post();
-                    $post_id = get_the_ID();
-                    echo '<option value="' . $post_id . '" ' . ((string) $post_id === (string) $value ? 'selected="selected"' : '') . '>' . get_the_title() . '</option>';
+                foreach ($posts as $post_item) {
+                    $post_id = $post_item->ID;
+                    echo '<option value="' . $post_id . '" ' . ((string) $post_id === (string) $value ? 'selected="selected"' : '') . '>' . $post_item->post_title . '</option>';
                 }
                 echo '</select>';
             }
-            wp_reset_postdata();
             break;
         case 'textarea':
         case 'htmlcontent':
