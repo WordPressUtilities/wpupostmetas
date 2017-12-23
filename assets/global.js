@@ -20,9 +20,9 @@ jQuery(document).ready(function() {
         });
     }
 
-    jQuery('.wpupostmetas-table input[type="color"]').each(function(){
-        jQuery(this).attr('type','text').wpColorPicker();
-    })
+    jQuery('.wpupostmetas-table input[type="color"]').each(function() {
+        jQuery(this).attr('type', 'text').wpColorPicker();
+    });
 });
 
 /* ----------------------------------------------------------
@@ -212,7 +212,10 @@ function wpupostmetas_setimages() {
 
         var wpmediaobj = {
             multiple: false,
+            state: 'insert',
+            frame: 'post'
         };
+
         if (mediatype == 'image') {
             wpmediaobj.library = {
                 type: 'image'
@@ -223,16 +226,16 @@ function wpupostmetas_setimages() {
 
         // Open on selected image
         frame.on('open', function() {
-            if (!$this.attr('data-attid')) {
+            if (!$imgButton.attr('data-attid')) {
                 return;
             }
-            attachment = wp.media.attachment($this.attr('data-attid'));
+            attachment = wp.media.attachment($imgButton.attr('data-attid'));
             attachment.fetch();
             frame.state().get('selection').add(attachment ? [attachment] : []);
         });
 
         // When an image is selected in the media frame...
-        frame.on('select', function() {
+        frame.on('insert', function() {
             var attachment = frame.state().get('selection').first().toJSON();
             if (attachment.type == 'image') {
                 $imgPreview.attr('src', attachment.url);
@@ -249,14 +252,12 @@ function wpupostmetas_setimages() {
         });
 
         /* Add an image */
-        $imgButton.on('click', function(e) {
+        function imgOpenEvent(e) {
             e.preventDefault();
             frame.open();
-        });
-        $imgPreview.on('click', function(e) {
-            e.preventDefault();
-            frame.open();
-        });
+        }
+        $imgButton.on('click', imgOpenEvent);
+        $imgPreview.on('click', imgOpenEvent);
 
         /* Remove an image */
         $imgRemove.on('click', function(e) {
@@ -268,7 +269,7 @@ function wpupostmetas_setimages() {
             $imgButton.text($imgButton.attr('data-addlabel'));
             $this.removeClass('wpupostmetas-field-image--hasimage');
             $this.removeClass('wpupostmetas-field-image--hasfile');
-        })
+        });
     });
 
 }
