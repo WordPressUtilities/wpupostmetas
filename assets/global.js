@@ -92,13 +92,16 @@ var wpupostmetas_settables = function() {
         // Save values in field
         table.on('change keydown keyup', '[name]', function() {
             wpupostmetas_settable(table, input);
+
         });
         // Add a new line
         tableParent.on('click', '.plus', function(e) {
             e.preventDefault();
             var nbLines = tableParent.find('tbody tr').length;
             if (nbLines < table_maxline) {
-                table.append(jQuery(tpl.val()));
+                var newLine = jQuery(tpl.val());
+                table.append(newLine);
+                jQuery(window).trigger('wpupostmetas__action__add_line', newLine);
             }
         });
         // Copy last line
@@ -106,8 +109,9 @@ var wpupostmetas_settables = function() {
             e.preventDefault();
             var nbLines = tableParent.find('tbody tr').length;
             if (nbLines < table_maxline) {
-                var lastline = '<tr>' + tableParent.find('tbody tr:last-child').html() + '</tr>';
-                table.append(jQuery(lastline));
+                var lastline = jQuery('<tr>' + tableParent.find('tbody tr:last-child').html() + '</tr>');
+                table.append(lastline);
+                jQuery(window).trigger('wpupostmetas__action__copy_last_line', lastline);
             }
         });
         // Delete a line
@@ -115,6 +119,7 @@ var wpupostmetas_settables = function() {
             e.preventDefault();
             if (confirm(wpupostmetas_tra.delete_line_txt)) {
                 jQuery(this).closest('tr').remove();
+                jQuery(window).trigger('wpupostmetas__action__delete_line_txt');
             }
             wpupostmetas_settable(table, input);
         });
@@ -129,6 +134,7 @@ var wpupostmetas_settables = function() {
             else {
                 tr.insertAfter(tr.next());
             }
+            jQuery(window).trigger('wpupostmetas__action__moving_line', tr);
             wpupostmetas_settable(table, input);
         });
 

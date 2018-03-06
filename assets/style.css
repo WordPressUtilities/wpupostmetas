@@ -192,8 +192,18 @@
     vertical-align: -4px;
 }
 
+.wpupostmetas-table-post-wrap .table-toolbox div {
+    width: 6em;
+}
+
 .wpupostmetas-table-post-wrap .table-toolbox button {
     visibility: hidden;
+    width: 2em;
+    padding: 0;
+    border: 0;
+    text-align: center;
+    line-height: 2;
+    background-color: #ccc;
 }
 
 .wpupostmetas-table-post-wrap tr:last-child .table-toolbox .down,
