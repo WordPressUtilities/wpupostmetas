@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.28.3
+Version: 0.28.4
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -416,6 +416,23 @@ class WPUPostMetas {
         $order = isset($field['order']) ? $field['order'] : 'ASC';
         $el_id = 'el_id_' . $id;
         $idname = 'name="' . $id . '"';
+
+        if (isset($field['type']) && ($field['type'] == 'separator' || $field['type'] == 'title')) {
+            if ($only_field === false) {
+                echo '<tr class="' . $field['type'] . '"><td colspan="2">';
+            }
+            if ($field['type'] == 'separator') {
+                echo '<hr />';
+            }
+            if ($field['type'] == 'title') {
+                echo '<h3>' . $field['name'] . '</h3>';
+            }
+            if ($only_field === false) {
+                echo '</td></tr>';
+            }
+            return;
+        }
+
         if ($only_field === false) {
             $idname = 'id="' . $el_id . '" name="' . $id . '"';
             echo '<tr ' . ($id_lang !== false ? 'data-wpupostmetaslang="' . $id_lang . '"' : '') . '>';
