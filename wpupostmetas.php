@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.28.5.1
+Version: 0.28.6
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.28.5.1';
+    public $version = '0.28.6';
 
     /**
      * Initialize class
@@ -55,7 +55,7 @@ class WPUPostMetas {
         $this->load_fields();
         $this->set_admin_columns();
 
-        include dirname( __FILE__ ) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        include dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpupostmetas\WPUBaseUpdate(
             'WordPressUtilities',
             'wpupostmetas',
@@ -555,9 +555,13 @@ class WPUPostMetas {
             echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
             break;
         case 'editor':
-            wp_editor($value, $id, array(
+            $editor_args = array(
                 'textarea_rows' => 3
-            ));
+            );
+            if (isset($field['editor_args']) && is_array($field['editor_args'])) {
+                $editor_args = array_merge($editor_args, $field['editor_args']);
+            }
+            wp_editor($value, $id, $editor_args);
             break;
         case 'table':
 
