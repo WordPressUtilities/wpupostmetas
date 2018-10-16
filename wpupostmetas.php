@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.28.6
+Version: 0.28.7
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.28.6';
+    public $version = '0.28.7';
 
     /**
      * Initialize class
@@ -405,14 +405,14 @@ class WPUPostMetas {
 
             // If new post, try to load a default value
             if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
-                $value = $field['default'];
+                $value = $this->field_content_value($field['default'], $id_lang);
             }
 
             // Test if non single value contains an empty value
             if (isset($field['default']) && empty($value)) {
                 $arr_post_meta = get_post_meta($main_post_id, $id, false);
                 if (!isset($arr_post_meta[0])) {
-                    $value = $field['default'];
+                    $value = $this->field_content_value($field['default'], $id_lang);
                     $i = update_post_meta($main_post_id, $id, $value);
                 }
             }
@@ -615,6 +615,24 @@ class WPUPostMetas {
             echo '</td>';
             echo '</tr>';
         }
+    }
+
+    public function field_content_value($default, $id_lang) {
+        $value = $default;
+        if (is_array($default) && $id_lang) {
+            /* Lang default key exists */
+            if (isset($default[$id_lang])) {
+                return $default[$id_lang];
+            }
+            /* Take first available value */
+            else {
+                foreach ($default as $value_tmp) {
+                    return $value_tmp;
+                }
+            }
+        }
+
+        return $value;
     }
 
     public function field_content_table_line($id, $table_columns, $values = false) {
