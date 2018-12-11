@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Post Metas\n"
-"POT-Creation-Date: 2018-10-17 23:12+0200\n"
+"POT-Creation-Date: 2018-12-11 14:38+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Darklg <darklg.blog@gmail.com>\n"
 "Language-Team: \n"
@@ -15,56 +15,56 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: ../.\n"
 
-#: .././wpupostmetas.php:78
+#: .././wpupostmetas.php:81
 msgid "Delete this line?"
 msgstr "Supprimer cette ligne ?"
 
-#: .././wpupostmetas.php:486
+#: .././wpupostmetas.php:490
 msgid "Remove image"
 msgstr "Retirer l’image"
 
-#: .././wpupostmetas.php:487
+#: .././wpupostmetas.php:491
 msgid "Choose an image"
 msgstr "Choisir une image"
 
-#: .././wpupostmetas.php:488
+#: .././wpupostmetas.php:492
 msgid "Change image"
 msgstr "Changer l’image"
 
-#: .././wpupostmetas.php:490
+#: .././wpupostmetas.php:494
 msgid "Remove file"
 msgstr "Retirer le fichier"
 
-#: .././wpupostmetas.php:491
+#: .././wpupostmetas.php:495
 msgid "Choose a file"
 msgstr "Choisir un fichier"
 
-#: .././wpupostmetas.php:492
+#: .././wpupostmetas.php:496
 msgid "Change file"
 msgstr "Changer de fichier"
 
-#: .././wpupostmetas.php:508 .././wpupostmetas.php:544
+#: .././wpupostmetas.php:512 .././wpupostmetas.php:548
 msgid "Select a value"
 msgstr "Sélectionnez une valeur"
 
-#: .././wpupostmetas.php:529 .././wpupostmetas.php:545
-#: .././wpupostmetas.php:690
+#: .././wpupostmetas.php:533 .././wpupostmetas.php:549
+#: .././wpupostmetas.php:694
 msgid "None"
 msgstr "Aucun"
 
-#: .././wpupostmetas.php:582
+#: .././wpupostmetas.php:586
 msgid "Add a new line"
 msgstr "Nouvelle ligne"
 
-#: .././wpupostmetas.php:583
+#: .././wpupostmetas.php:587
 msgid "Copy last line"
 msgstr "Copier la dernière ligne"
 
-#: .././wpupostmetas.php:816
+#: .././wpupostmetas.php:821
 msgid "No"
 msgstr "Non"
 
-#: .././wpupostmetas.php:817
+#: .././wpupostmetas.php:822
 msgid "Yes"
 msgstr "Oui"
 
