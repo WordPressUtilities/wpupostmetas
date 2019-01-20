@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.28.9
+Version: 0.29.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.28.9';
+    public $version = '0.29.0';
 
     /**
      * Initialize class
@@ -430,6 +430,13 @@ class WPUPostMetas {
         $el_id = 'el_id_' . $id;
         $idname = 'name="' . $id . '"';
 
+        if (!isset($field['required'])) {
+            $field['required'] = false;
+        }
+
+        $required_attr = $field['required'] ? ' required="required" aria-required="true" ' : '';
+        $required_label = $field['required'] ? ' <em>*</em>' : '';
+
         if (isset($field['type']) && ($field['type'] == 'separator' || $field['type'] == 'title')) {
             if ($only_field === false) {
                 echo '<tr class="' . $field['type'] . '"><td colspan="2">';
@@ -449,7 +456,7 @@ class WPUPostMetas {
         if ($only_field === false) {
             $idname = 'id="' . $el_id . '" name="' . $id . '"';
             echo '<tr ' . ($id_lang !== false ? 'data-wpupostmetaslang="' . $id_lang . '"' : '') . '>';
-            echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . ' :</label></th>';
+            echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . $required_label . ' :</label></th>';
             echo '<td valign="top">';
             if ($id_lang !== false) {
                 echo '<div class="qtranxs-translatable">';
@@ -502,13 +509,13 @@ class WPUPostMetas {
             echo '<div class="wpupostmetas-field-file__name">' . $file_name . '</small></div>';
             echo '<img src="' . $img_url . '"  alt="" /> ';
             echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-addlabel="' . esc_attr($label_choose) . '" data-changelabel="' . esc_attr($label_change) . '" type="button">' . $label . '</button>';
-            echo '<input type="hidden" name="' . $id . '" value="' . esc_attr($value) . '" />';
+            echo '<input ' . $required_attr . ' type="hidden" name="' . $id . '" value="' . esc_attr($value) . '" />';
             echo '<div class="wpupostmetas-field-image__remove"><small><a href="#">' . $label_delete . '</a></small></div>';
             echo '</div>';
 
             break;
         case 'select':
-            echo '<select ' . $idname . '>';
+            echo '<select ' . $required_attr . ' ' . $idname . '>';
             echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
             foreach ($field_datas as $key => $var) {
                 echo '<option value="' . $key . '" ' . ((string) $key === (string) $value ? 'selected="selected"' : '') . '>' . $var . '</option>';
@@ -523,8 +530,8 @@ class WPUPostMetas {
             }
             break;
         case 'checkbox':
-            echo '<label><input type="checkbox" ' . $idname . ' ' . checked($value, '1', 0) . ' value="1" /> ' . (isset($field['checkbox_label']) ? $field['checkbox_label'] : $field['name']) . '</label>';
-            echo '<input type="hidden" name="' . $id . '__check" value="1" />';
+            echo '<label><input type="checkbox" ' . $idname . ' ' . checked($value, '1', 0) . ' value="1" /> ' . (isset($field['checkbox_label']) ? $field['checkbox_label'] : $field['name']) . $required_label . '</label>';
+            echo '<input ' . $required_attr . ' type="hidden" name="' . $id . '__check" value="1" />';
             break;
         case 'page':
             wp_dropdown_pages(array(
@@ -544,7 +551,7 @@ class WPUPostMetas {
                 'order' => $order
             ));
             if (!empty($posts)) {
-                echo '<select ' . $idname . '>';
+                echo '<select ' . $required_attr . ' ' . $idname . '>';
                 echo '<option value="" disabled selected style="display:none;">' . __('Select a value', 'wpupostmetas') . '</option>';
                 echo '<option value="">' . __('None', 'wpupostmetas') . '</option>';
                 foreach ($posts as $post_item) {
@@ -556,7 +563,7 @@ class WPUPostMetas {
             break;
         case 'textarea':
         case 'htmlcontent':
-            echo '<textarea rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
+            echo '<textarea ' . $required_attr . ' rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
             break;
         case 'editor':
             $editor_args = array(
@@ -604,10 +611,10 @@ class WPUPostMetas {
         case 'email':
         case 'number':
         case 'url':
-            echo '<input type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
+            echo '<input ' . $required_attr . ' type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
             break;
         default:
-            echo '<input type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
+            echo '<input ' . $required_attr . ' type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
         }
         if (isset($field['help'])) {
             echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
