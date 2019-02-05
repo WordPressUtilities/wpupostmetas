@@ -76,6 +76,9 @@ var wpupostmetas_settable = function(table, input) {
         basename: table_basename,
         cols: table.find('thead th').length
     });
+    if (!input) {
+        input = table.parent().find('.wpupostmetas-table-main-value');
+    }
     input.val(JSON.stringify(results));
 };
 
@@ -89,11 +92,12 @@ var wpupostmetas_settables = function() {
             input = tableParent.find('input[type=hidden]');
 
         wpupostmetas_settable(table, input);
+
         // Save values in field
         table.on('change keydown keyup', '[name]', function() {
             wpupostmetas_settable(table, input);
-
         });
+
         // Add a new line
         tableParent.on('click', '.plus', function(e) {
             e.preventDefault();
@@ -104,6 +108,7 @@ var wpupostmetas_settables = function() {
                 jQuery(window).trigger('wpupostmetas__action__add_line', newLine);
             }
         });
+
         // Copy last line
         tableParent.on('click', '.copy', function(e) {
             e.preventDefault();
@@ -114,6 +119,7 @@ var wpupostmetas_settables = function() {
                 jQuery(window).trigger('wpupostmetas__action__copy_last_line', lastline);
             }
         });
+
         // Delete a line
         tableParent.on('click', '.delete', function(e) {
             e.preventDefault();
@@ -123,6 +129,7 @@ var wpupostmetas_settables = function() {
             }
             wpupostmetas_settable(table, input);
         });
+
         // Move a line
         tableParent.on('click', '.down, .up', function(e) {
             e.preventDefault();
@@ -207,14 +214,19 @@ var wpupostmetas_setattachmentpreview = function(self) {
 ---------------------------------------------------------- */
 
 function wpupostmetas_setimages() {
-    jQuery('.wpupostmetas-field-image').each(function(e) {
-        var $this = jQuery(this),
-            mediatype = $this.attr('data-type'),
+    function setup_image(e) {
+        var $this = jQuery(this);
+        if ($this.attr('data-setup') == '1') {
+            return;
+        }
+        $this.attr('data-setup', 1);
+
+        var mediatype = $this.attr('data-type'),
             $txtPreview = $this.find('.wpupostmetas-field-file__name'),
             $imgPreview = $this.find('img'),
             $imgRemove = $this.find('.wpupostmetas-field-image__remove a'),
             $imgButton = $this.find('button'),
-            $imgField = $this.find('input[type="hidden"]');
+            $imgField = $this.find('.wpupostmetas-field-image__preview');
 
         var wpmediaobj = {
             multiple: false,
@@ -254,6 +266,7 @@ function wpupostmetas_setimages() {
             $imgButton.attr('data-attid', attachment.id);
             // Send the attachment id to our hidden input
             $imgField.val(attachment.id);
+            $imgField.trigger('change');
             $imgButton.text($imgButton.attr('data-changelabel'));
         });
 
@@ -269,6 +282,7 @@ function wpupostmetas_setimages() {
         $imgRemove.on('click', function(e) {
             e.preventDefault();
             $imgField.val('');
+            $imgField.trigger('change');
             $imgButton.attr('data-attid', '');
             $txtPreview.html('');
             $imgPreview.attr('src', '');
@@ -276,6 +290,11 @@ function wpupostmetas_setimages() {
             $this.removeClass('wpupostmetas-field-image--hasimage');
             $this.removeClass('wpupostmetas-field-image--hasfile');
         });
+    }
+
+    jQuery(window).on('wpupostmetas__action__add_line wpupostmetas__action__copy_last_line wpupostmetas__action__delete_line_txt wpupostmetas__action__moving_line', function() {
+        jQuery('.wpupostmetas-field-image').each(setup_image);
     });
+    jQuery('.wpupostmetas-field-image').each(setup_image);
 
 }

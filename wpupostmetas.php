@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.29.0
+Version: 0.30.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.29.0';
+    public $version = '0.30.0';
 
     /**
      * Initialize class
@@ -509,7 +509,7 @@ class WPUPostMetas {
             echo '<div class="wpupostmetas-field-file__name">' . $file_name . '</small></div>';
             echo '<img src="' . $img_url . '"  alt="" /> ';
             echo '<button class="button primary wpupostmetas-image-link" data-attid="' . esc_attr($value) . '" data-addlabel="' . esc_attr($label_choose) . '" data-changelabel="' . esc_attr($label_change) . '" type="button">' . $label . '</button>';
-            echo '<input ' . $required_attr . ' type="hidden" name="' . $id . '" value="' . esc_attr($value) . '" />';
+            echo '<input class="wpupostmetas-field-image__preview" ' . $required_attr . ' type="hidden" ' . $idname . ' value="' . esc_attr($value) . '" />';
             echo '<div class="wpupostmetas-field-image__remove"><small><a href="#">' . $label_delete . '</a></small></div>';
             echo '</div>';
 
@@ -525,7 +525,7 @@ class WPUPostMetas {
         case 'radio':
             foreach ($field_datas as $key => $var) {
                 $item_id = 'radio_' . $id . '_' . $key;
-                echo '<input type="radio" id="' . $item_id . '" name="' . $id . '" value="' . $key . '" ' . ((string) $key === (string) $value ? 'checked="checked"' : '') . ' />';
+                echo '<input type="radio" id="' . $item_id . '" ' . $idname . ' value="' . $key . '" ' . ((string) $key === (string) $value ? 'checked="checked"' : '') . ' />';
                 echo '<label for="' . $item_id . '">' . $var . '</label>';
             }
             break;
@@ -599,7 +599,7 @@ class WPUPostMetas {
 
             echo '</tbody>';
             echo '</table>';
-            echo '<input type="hidden" ' . $idname . ' value="" />';
+            echo '<input class="wpupostmetas-table-main-value" type="hidden" ' . $idname . ' value="" />';
             echo '<textarea class="template">';
             echo htmlentities($this->field_content_table_line($id, $table_columns));
 
@@ -754,8 +754,8 @@ class WPUPostMetas {
             $return = $value;
             break;
         case 'table':
-            $return = $value;
-            if (!is_array(json_decode(stripslashes($value), true))) {
+            $return = stripslashes($value);
+            if (!is_array(json_decode($return, true))) {
                 $return = array();
             }
             break;
