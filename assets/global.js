@@ -57,7 +57,6 @@ var wpupostmetas_groupArray = function(arr, options) {
     var newArr = [{}],
         tmpName = '',
         currentCol = 0;
-
     for (var i = 0, len = arr.length; i < len; i++) {
         if (i > 0 && i % options.cols == 0) {
             currentCol++;
@@ -89,7 +88,7 @@ var wpupostmetas_settables = function() {
             table_maxline = parseInt(table.attr('data-table-maxline'), 10),
             tableParent = table.parent(),
             tpl = tableParent.find('.template'),
-            input = tableParent.find('input[type=hidden]');
+            input = tableParent.find('.wpupostmetas-table-main-value');
 
         wpupostmetas_settable(table, input);
 
