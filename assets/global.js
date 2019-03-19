@@ -11,6 +11,7 @@ jQuery(document).ready(function() {
     });
 
     wpupostmetas_setmultilingual();
+    wpupostmetas_settabs();
     wpupostmetas_settables();
     wpupostmetas_setimages();
 
@@ -47,6 +48,46 @@ var wpupostmetas_setmultilingual = function() {
             display_line($this, parseInt(jQuery(this).attr('data-i'), 20));
         });
     });
+};
+
+/* ----------------------------------------------------------
+  Tabs
+---------------------------------------------------------- */
+
+var wpupostmetas_settabs = function() {
+
+    /* Build elements */
+    var $first_table = jQuery('.wpupostmetas-table').eq(0);
+    var $tab_fields = jQuery('.wpupostmetas-table [data-wpufieldtab]');
+    var tab_ids = {};
+    $tab_fields.each(function() {
+        if (this.getAttribute('data-wpufieldtab')) {
+            tab_ids[this.getAttribute('data-wpufieldtab')] = this.getAttribute('data-wpufieldtab');
+        }
+    });
+
+    /* Generate tabs */
+    $tab_wrapper = jQuery('<div class="wpupostmetas-tabs__wrapper nav-tab-small nav-tab-wrapper"></div>');
+    for (var _tab in tab_ids) {
+        $tab_wrapper.append(jQuery('<button class="nav-tab" data-tab="' + _tab + '">' + _tab + '</button>'));
+    }
+    $first_table.parent().prepend($tab_wrapper);
+
+    /* Switch tab on click */
+    $tab_wrapper.on('click', 'button', function(e) {
+        e.preventDefault();
+        set_tab(this.getAttribute('data-tab'));
+    });
+    set_tab(tab_ids[Object.keys(tab_ids)[0]]);
+
+    function set_tab(tab_id) {
+        /* Display fields */
+        $tab_fields.addClass('is-hidden');
+        $tab_fields.filter('[data-wpufieldtab="' + tab_id + '"]').removeClass('is-hidden');
+        /* Change tab status */
+        $tab_wrapper.find('[data-tab]').removeClass('nav-tab-active');
+        $tab_wrapper.find('[data-tab="' + tab_id + '"]').addClass('nav-tab-active');
+    }
 };
 
 /* ----------------------------------------------------------

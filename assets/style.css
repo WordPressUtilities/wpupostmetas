@@ -26,6 +26,10 @@
     padding-bottom: 8px;
 }
 
+.wpupostmetas-table tr.is-hidden {
+    display: none!important;
+}
+
 @media(max-width:400px) {
     .wpupostmetas-table,
     .wpupostmetas-table > tbody,
@@ -282,4 +286,22 @@
 .wpupostmetas-field-image--hasfile .wpupostmetas-field-image__remove,
 .wpupostmetas-field-image--hasimage .wpupostmetas-field-image__remove {
     display: block;
+}
+
+/* ----------------------------------------------------------
+  Tabs
+---------------------------------------------------------- */
+
+.wpupostmetas-tabs__wrapper {
+    margin-bottom: 1em;
+}
+
+.wpupostmetas-tabs__wrapper .nav-tab {
+    cursor: pointer;
+}
+
+.wpupostmetas-tabs__wrapper .nav-tab.nav-tab-active {
+    border-bottom: 1px solid #fff;
+    color: #444;
+    background-color: #fff;
 }

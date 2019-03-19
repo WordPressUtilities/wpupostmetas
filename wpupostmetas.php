@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.30.2
+Version: 0.31.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.30.2';
+    public $version = '0.31.0';
 
     /**
      * Initialize class
@@ -430,6 +430,10 @@ class WPUPostMetas {
             $value = $val;
         }
 
+        if (!isset($field['tab']) || !$field['tab']) {
+            $field['tab'] = '';
+        }
+
         $orderby = isset($field['orderby']) ? $field['orderby'] : 'name';
         $order = isset($field['order']) ? $field['order'] : 'ASC';
         $el_id = 'el_id_' . $id;
@@ -444,7 +448,7 @@ class WPUPostMetas {
 
         if (isset($field['type']) && ($field['type'] == 'separator' || $field['type'] == 'title')) {
             if ($only_field === false) {
-                echo '<tr class="' . $field['type'] . '"><td colspan="2">';
+                echo '<tr ' . ($field['tab'] ? 'data-wpufieldtab="' . $field['tab'] . '"' : '') . ' class="' . $field['type'] . '"><td colspan="2">';
             }
             if ($field['type'] == 'separator') {
                 echo '<hr />';
@@ -460,7 +464,7 @@ class WPUPostMetas {
 
         if ($only_field === false) {
             $idname = 'id="' . $el_id . '" name="' . $id . '"';
-            echo '<tr ' . ($id_lang !== false ? 'data-wpupostmetaslang="' . $id_lang . '"' : '') . '>';
+            echo '<tr ' . ($field['tab'] ? 'data-wpufieldtab="' . $field['tab'] . '"' : '') . '  ' . ($id_lang !== false ? 'data-wpupostmetaslang="' . $id_lang . '"' : '') . '>';
             echo '<th valign="top"><label for="el_id_' . $id . '">' . $field['name'] . $required_label . ' :</label></th>';
             echo '<td valign="top">';
             if ($id_lang !== false) {
