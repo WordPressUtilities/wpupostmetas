@@ -336,7 +336,7 @@ function wpupostmetas_setimages() {
         /* Remove an image */
         $imgRemove.on('click', function(e) {
             e.preventDefault();
-            $imgField.val('');
+            $imgField.val('0');
             $imgField.trigger('change');
             $imgButton.attr('data-attid', '');
             $txtPreview.html('');
