@@ -309,6 +309,10 @@ function wpupostmetas_setimages() {
 
         // When an image is selected in the media frame...
         frame.on('insert', function() {
+
+            /* Reset */
+            reset_wrapper();
+
             var attachment = frame.state().get('selection').first().toJSON();
             if (attachment.type == 'image') {
                 $imgPreview.attr('src', attachment.url);
@@ -333,9 +337,7 @@ function wpupostmetas_setimages() {
         $imgButton.on('click', imgOpenEvent);
         $imgPreview.on('click', imgOpenEvent);
 
-        /* Remove an image */
-        $imgRemove.on('click', function(e) {
-            e.preventDefault();
+        function reset_wrapper(){
             $imgField.val('0');
             $imgField.trigger('change');
             $imgButton.attr('data-attid', '');
@@ -344,6 +346,12 @@ function wpupostmetas_setimages() {
             $imgButton.text($imgButton.attr('data-addlabel'));
             $this.removeClass('wpupostmetas-field-image--hasimage');
             $this.removeClass('wpupostmetas-field-image--hasfile');
+        }
+
+        /* Remove an image */
+        $imgRemove.on('click', function(e) {
+            e.preventDefault();
+            reset_wrapper();
         });
     }
 
