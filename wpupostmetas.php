@@ -4,7 +4,7 @@
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.31.6
+Version: 0.31.7
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -17,7 +17,7 @@ class WPUPostMetas {
 
     public $boxes = array();
     public $fields = array();
-    public $version = '0.31.6';
+    public $version = '0.31.7';
 
     /**
      * Initialize class
@@ -233,13 +233,11 @@ class WPUPostMetas {
                             break;
                         }
                     default:
-
-                        if (isset($field['admin_column_filterable']) && $field['admin_column_filterable'] === true) {
-                            $value = '<a href="' . admin_url('edit.php?post_type=' . urlencode($post_type) . '&meta_key=' . urlencode($field_id) . '&meta_value=' . urlencode($value)) . '">' . $value . '</a>';
-                        }
-
-                        // Display raw value
                         $display_value = $value;
+                    }
+
+                    if (isset($field['admin_column_filterable']) && $field['admin_column_filterable'] === true) {
+                        $display_value = '<a href="' . admin_url('edit.php?post_type=' . urlencode($post_type) . '&meta_key=' . urlencode($field_id) . '&meta_value=' . urlencode($value)) . '">' . $display_value . '</a>';
                     }
 
                     echo apply_filters('wputh_post_metas_admin_column_content_callback', $display_value, $field_id, $post_ID, $field, $value);
