@@ -3,8 +3,9 @@
 /*
 Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
+Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.31.8
+Version: 0.32.0
 Author: Darklg
 Author URI: http://darklg.me/
 License: MIT License
@@ -15,9 +16,14 @@ defined('ABSPATH') or die(':(');
 
 class WPUPostMetas {
 
+    public $version = '0.32.0';
     public $boxes = array();
     public $fields = array();
-    public $version = '0.31.8';
+    public $settings_update;
+    public $plugin_description;
+    public $admin_columns;
+    public $admin_columns_sortable;
+    public $admin_columns_filterable;
 
     /**
      * Initialize class
@@ -71,7 +77,11 @@ class WPUPostMetas {
     }
 
     public function load_plugin_textdomain() {
-        load_plugin_textdomain('wpupostmetas', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+        $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
+        if (!load_plugin_textdomain('wpupostmetas', false, $lang_dir)) {
+            load_muplugin_textdomain('wpupostmetas', $lang_dir);
+        }
+        $this->plugin_description = __('Simple admin for post metas', 'wpupostmetas');
     }
 
     public function load_assets() {
