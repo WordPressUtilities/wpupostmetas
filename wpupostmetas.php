@@ -5,18 +5,24 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.32.0
+Version: 0.32.1
 Author: Darklg
-Author URI: http://darklg.me/
+Author URI: https://darklg.me/
+Text Domain: wpupostmetas
+Domain Path: /lang
+Requires at least: 6.1
+Requires PHP: 7.4
 License: MIT License
-License URI: http://opensource.org/licenses/MIT
+License URI: https://opensource.org/licenses/MIT
 */
 
 defined('ABSPATH') or die(':(');
 
 class WPUPostMetas {
+    public $qtranslatex;
+    public $qtranslate;
 
-    public $version = '0.32.0';
+    public $version = '0.32.1';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -423,7 +429,10 @@ class WPUPostMetas {
         $main_post_id = 0;
         if (is_object($post)) {
             $main_post_id = $post->ID;
-            $value = @trim(get_post_meta($main_post_id, $id, true));
+            $value = get_post_meta($main_post_id, $id, true);
+            if(is_string($value)){
+                $value = trim($value);
+            }
 
             // If new post, try to load a default value
             if (isset($field['default'], $post->post_title, $post->post_content) && empty($post->post_title) && empty($post->post_content) && empty($value)) {
@@ -442,6 +451,10 @@ class WPUPostMetas {
         if ($val !== false) {
             $value = $val;
         }
+            $display_value = $value;
+            if(is_array($display_value)){
+                $display_value = implode(', ', $display_value);
+            }
 
         if (!isset($field['tab']) || !$field['tab']) {
             $field['tab'] = '';
@@ -585,7 +598,7 @@ class WPUPostMetas {
             break;
         case 'textarea':
         case 'htmlcontent':
-            echo '<textarea ' . $required_attr . ' rows="3" cols="50" ' . $idname . '>' . $value . '</textarea>';
+            echo '<textarea ' . $required_attr . ' rows="3" cols="50" ' . $idname . '>' . $display_value . '</textarea>';
             break;
         case 'editor':
             $editor_args = array(
@@ -594,7 +607,7 @@ class WPUPostMetas {
             if (isset($field['editor_args']) && is_array($field['editor_args'])) {
                 $editor_args = array_merge($editor_args, $field['editor_args']);
             }
-            wp_editor($value, $id, $editor_args);
+            wp_editor($display_value, $id, $editor_args);
             break;
         case 'table':
 
@@ -634,10 +647,10 @@ class WPUPostMetas {
         case 'email':
         case 'number':
         case 'url':
-            echo '<input ' . $required_attr . ' type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($value) . '" />';
+            echo '<input ' . $required_attr . ' type="' . $field['type'] . '" ' . $idname . ' value="' . esc_attr($display_value) . '" />';
             break;
         default:
-            echo '<input ' . $required_attr . ' type="text" ' . $idname . ' value="' . esc_attr($value) . '" />';
+            echo '<input ' . $required_attr . ' type="text" ' . $idname . ' value="' . esc_attr($display_value) . '" />';
         }
         if (isset($field['help'])) {
             echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
