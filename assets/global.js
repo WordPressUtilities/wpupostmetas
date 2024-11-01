@@ -57,7 +57,7 @@ var wpupostmetas_setmultilingual = function() {
 var wpupostmetas_settabs = function() {
 
     jQuery('.wpupostmetas-table').each(function() {
-        set_tabs_elements(jQuery(this));;
+        set_tabs_elements(jQuery(this));
     });
 
     function set_tabs_elements($first_table) {
@@ -77,7 +77,7 @@ var wpupostmetas_settabs = function() {
         });
 
         /* Generate tabs */
-        $tab_wrapper = jQuery('<div class="wpupostmetas-tabs__wrapper nav-tab-small nav-tab-wrapper"></div>');
+        var $tab_wrapper = jQuery('<div class="wpupostmetas-tabs__wrapper nav-tab-small nav-tab-wrapper"></div>');
         for (var _tab in tab_ids) {
             $tab_wrapper.append(jQuery('<button class="nav-tab" data-tab="' + _tab + '">' + _tab + '</button>'));
         }
@@ -215,7 +215,7 @@ var wpupostmetas_setattachmentrefresh = function(self) {
     sparent.append(refresh);
 
     // Refresh all items on click
-    refresh.on('click', function(e) {
+    refresh.on('click', function() {
         jQuery('.' + refreshClass).trigger('click-refresh');
     });
 
@@ -269,7 +269,7 @@ var wpupostmetas_setattachmentpreview = function(self) {
 ---------------------------------------------------------- */
 
 function wpupostmetas_setimages() {
-    function setup_image(e) {
+    function setup_image() {
         var $this = jQuery(this);
         if ($this.attr('data-setup') == '1') {
             return;
@@ -302,7 +302,7 @@ function wpupostmetas_setimages() {
             if (!$imgButton.attr('data-attid')) {
                 return;
             }
-            attachment = wp.media.attachment($imgButton.attr('data-attid'));
+            var attachment = wp.media.attachment($imgButton.attr('data-attid'));
             attachment.fetch();
             frame.state().get('selection').add(attachment ? [attachment] : []);
         });

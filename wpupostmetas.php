@@ -5,13 +5,14 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.32.2
+Version: 0.33.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
 Domain Path: /lang
 Requires at least: 6.2
 Requires PHP: 8.0
+Network: Optional
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
@@ -22,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.32.2';
+    public $version = '0.33.0';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -67,7 +68,7 @@ class WPUPostMetas {
     }
 
     public function check_update() {
-        include __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpupostmetas\WPUBaseUpdate(
             'WordPressUtilities',
             'wpupostmetas',
