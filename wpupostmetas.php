@@ -5,7 +5,7 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.33.1
+Version: 0.33.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
@@ -23,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.33.1';
+    public $version = '0.33.2';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -85,8 +85,10 @@ class WPUPostMetas {
 
     public function load_plugin_textdomain() {
         $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
-        if (!load_plugin_textdomain('wpupostmetas', false, $lang_dir)) {
+        if (strpos(__DIR__, 'mu-plugins') !== false) {
             load_muplugin_textdomain('wpupostmetas', $lang_dir);
+        } else {
+            load_plugin_textdomain('wpupostmetas', false, $lang_dir);
         }
         $this->plugin_description = __('Simple admin for post metas', 'wpupostmetas');
     }
@@ -431,7 +433,7 @@ class WPUPostMetas {
         if (is_object($post)) {
             $main_post_id = $post->ID;
             $value = get_post_meta($main_post_id, $id, true);
-            if(is_string($value)){
+            if (is_string($value)) {
                 $value = trim($value);
             }
 
@@ -452,10 +454,10 @@ class WPUPostMetas {
         if ($val !== false) {
             $value = $val;
         }
-            $display_value = $value;
-            if(is_array($display_value)){
-                $display_value = implode(', ', $display_value);
-            }
+        $display_value = $value;
+        if (is_array($display_value)) {
+            $display_value = implode(', ', $display_value);
+        }
 
         if (!isset($field['tab']) || !$field['tab']) {
             $field['tab'] = '';
