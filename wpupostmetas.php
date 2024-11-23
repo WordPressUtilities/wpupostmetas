@@ -5,7 +5,7 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.33.0
+Version: 0.33.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
@@ -23,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.33.0';
+    public $version = '0.33.1';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -42,7 +42,7 @@ class WPUPostMetas {
         if (!is_admin()) {
             return;
         }
-        add_action('plugins_loaded', array(&$this,
+        add_action('after_setup_theme', array(&$this,
             'load_plugin_textdomain'
         ));
         add_action('add_meta_boxes', array(
