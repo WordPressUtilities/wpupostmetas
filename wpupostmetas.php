@@ -5,7 +5,7 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.33.2
+Version: 0.34.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
@@ -23,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.33.2';
+    public $version = '0.34.0';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -454,6 +454,13 @@ class WPUPostMetas {
         if ($val !== false) {
             $value = $val;
         }
+
+        if (isset($field['is_debug_array'])) {
+            $field['readonly'] = true;
+            $field['type'] = 'textarea';
+            $value = print_r($value, true);
+        }
+
         $display_value = $value;
         if (is_array($display_value)) {
             $display_value = implode(', ', $display_value);
@@ -473,6 +480,9 @@ class WPUPostMetas {
         }
 
         $required_attr = $field['required'] ? ' required="required" aria-required="true" ' : '';
+        if (isset($field['readonly']) && $field['readonly']) {
+            $required_attr .= ' readonly="readonly" ';
+        }
         $required_label = $field['required'] ? ' <em>*</em>' : '';
 
         if (isset($field['type']) && ($field['type'] == 'separator' || $field['type'] == 'title')) {
@@ -762,6 +772,10 @@ class WPUPostMetas {
      */
     public function check_field_value($id, $field) {
         if (!isset($_POST[$id]) && $field['type'] != 'checkbox') {
+            return false;
+        }
+
+        if (isset($field['readonly']) && $field['readonly']) {
             return false;
         }
 
