@@ -5,7 +5,7 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.34.0
+Version: 0.34.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
@@ -23,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.34.0';
+    public $version = '0.34.1';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -665,6 +665,9 @@ class WPUPostMetas {
         default:
             echo '<input ' . $required_attr . ' type="text" ' . $idname . ' value="' . esc_attr($display_value) . '" />';
         }
+        if (isset($field['purge_value']) && $field['purge_value'] === true) {
+            echo '<label class="wpupostmetas-purge"><input type="checkbox" name="' . $id . '__purge" value="1" /> ' . __('Purge this field', 'wpupostmetas') . '</label>';
+        }
         if (isset($field['help'])) {
             echo '<div class="wpupostmetas-description-help">' . $field['help'] . '</div>';
         }
@@ -775,6 +778,10 @@ class WPUPostMetas {
             return false;
         }
 
+        if (isset($field['purge_value']) && $field['purge_value'] && isset($_POST[$id . '__purge']) && $_POST[$id . '__purge'] == '1') {
+            return '';
+        }
+
         if (isset($field['readonly']) && $field['readonly']) {
             return false;
         }
@@ -798,7 +805,7 @@ class WPUPostMetas {
             $return = array_key_exists($value, $field['datas']) ? $value : false;
             break;
         case 'textarea':
-            $return = strip_tags($value);
+            $return = wp_strip_all_tags($value);
             break;
         case 'htmlcontent':
             $return = $value;
