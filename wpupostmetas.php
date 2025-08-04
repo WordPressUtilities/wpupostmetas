@@ -5,7 +5,7 @@ Plugin Name: WPU Post Metas
 Plugin URI: https://github.com/WordPressUtilities/wpupostmetas
 Update URI: https://github.com/WordPressUtilities/wpupostmetas
 Description: Simple admin for post metas
-Version: 0.34.1
+Version: 0.34.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpupostmetas
@@ -23,7 +23,7 @@ class WPUPostMetas {
     public $qtranslatex;
     public $qtranslate;
 
-    public $version = '0.34.1';
+    public $version = '0.34.2';
     public $boxes = array();
     public $fields = array();
     public $settings_update;
@@ -385,7 +385,10 @@ class WPUPostMetas {
         $fields = $this->fields;
         $boxid = str_replace('wputh_box_', '', $details['id']);
         $boxfields = $this->fields_from_box($boxid, $this->fields);
-        wp_nonce_field(plugin_basename(__FILE__), 'wputh_post_metas_noncename');
+        if (!defined('WPUTH_POST_METAS_NONCE')) {
+            define('WPUTH_POST_METAS_NONCE', true);
+            wp_nonce_field(plugin_basename(__FILE__), 'wputh_post_metas_noncename');
+        }
         echo apply_filters('wpupostmetas__box_content__before_table', '', $boxid, $details, $boxfields);
         echo '<table class="wpupostmetas-table">';
         foreach ($fields as $id => $field) {
@@ -902,9 +905,9 @@ class WPUPostMetas {
     /**
      * Returns fields for a given box
      *
-     * @param unknown $box_id
-     * @param unknown $fields
-     * @return unknown
+     * @param string $box_id
+     * @param array $fields
+     * @return array
      */
     public function fields_from_box($box_id, $fields) {
         $boxfields = array();
